@@ -67,7 +67,7 @@ export default function Home() {
               <div className="flex flex-wrap gap-3 sm:gap-4 pt-2">
                 <a
                   href="#contact"
-                  className="bg-yellow-400 text-blue-950 font-bold px-6 sm:px-10 py-3 sm:py-4 rounded-full text-sm sm:text-lg hover:bg-white transition-all duration-300 shadow-lg shadow-yellow-400/20"
+                  className="bg-emerald-500 text-white font-bold px-6 sm:px-10 py-3 sm:py-4 rounded-full text-sm sm:text-lg hover:bg-emerald-600 transition-all duration-300 shadow-lg shadow-emerald-500/20"
                 >
                   Get Connected Now
                 </a>
@@ -91,8 +91,89 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ============ PACKAGES SECTION ============ */}
+      <section id="packages" className="py-16 sm:py-24 px-4 sm:px-6 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
+            <p className="text-blue-600 font-semibold tracking-widest text-xs sm:text-sm">OUR PACKAGES</p>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-blue-950 mt-2 sm:mt-3">
+              Choose Your Perfect Plan
+            </h2>
+            <p className="text-slate-600 text-sm sm:text-base mt-4">Select the speed that fits your household needs</p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            {[
+              { speed: "5", price: "1,000", originalPrice: "1,500", accent: "from-emerald-500 to-emerald-400", tag: "Starter" },
+              { speed: "8", price: "1,500", originalPrice: "2,000", accent: "from-blue-500 to-cyan-400", tag: "Most Popular", popular: true },
+              { speed: "15", price: "2,000", originalPrice: "2,500", accent: "from-purple-500 to-violet-400", tag: "Standard" },
+              { speed: "30", price: "3,000", originalPrice: "4,000", accent: "from-orange-500 to-amber-400", tag: "Premium" },
+            ].map((pkg, i) => (
+              <div
+                key={i}
+                className={`relative bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-lg border transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl ${
+                  pkg.popular ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-slate-100'
+                }`}
+              >
+                {pkg.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="bg-gradient-to-r from-blue-600 to-blue-700 text-white text-[10px] sm:text-xs font-bold px-3 sm:px-4 py-1 sm:py-1.5 rounded-full">
+                      Most Popular
+                    </span>
+                  </div>
+                )}
+                
+                <div className="text-center">
+                  <div className={`w-14 h-14 sm:w-16 sm:h-16 mx-auto rounded-2xl bg-gradient-to-br ${pkg.accent} flex items-center justify-center mb-3 sm:mb-4`}>
+                    <Wifi className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+                  </div>
+                  
+                  <div className="text-xs sm:text-sm text-slate-500 font-medium mb-1">{pkg.tag}</div>
+                  
+                  <div className="text-4xl sm:text-5xl font-extrabold text-blue-950">
+                    {pkg.speed}
+                  </div>
+                  <div className="text-xs sm:text-sm text-slate-500 mb-2">Mbps</div>
+                  
+                  <div className="flex items-center justify-center gap-2 sm:gap-3">
+                    <span className="text-2xl sm:text-3xl font-bold text-blue-600">KSh {pkg.price}</span>
+                    <span className="text-xs sm:text-sm text-slate-400 line-through">KSh {pkg.originalPrice}</span>
+                  </div>
+                  <div className="text-[10px] sm:text-xs text-green-600 font-medium mt-1">
+                    Save {Math.round(((parseInt(pkg.originalPrice) - parseInt(pkg.price)) / parseInt(pkg.originalPrice)) * 100)}%
+                  </div>
+                  
+                  <ul className="mt-4 sm:mt-6 space-y-1.5 sm:space-y-2 text-left">
+                    <li className="flex items-center gap-2 text-xs sm:text-sm text-slate-600">
+                      <span className="text-green-500 text-sm sm:text-base">✓</span> Unlimited data
+                    </li>
+                    <li className="flex items-center gap-2 text-xs sm:text-sm text-slate-600">
+                      <span className="text-green-500 text-sm sm:text-base">✓</span> Free installation
+                    </li>
+                    <li className="flex items-center gap-2 text-xs sm:text-sm text-slate-600">
+                      <span className="text-green-500 text-sm sm:text-base">✓</span> 1 month free
+                    </li>
+                  </ul>
+                  
+                  <a
+                    href="#contact"
+                    className={`mt-4 sm:mt-6 inline-flex w-full items-center justify-center rounded-xl sm:rounded-2xl px-4 sm:px-6 py-2.5 sm:py-3 font-semibold transition-all duration-300 text-sm sm:text-base ${
+                      pkg.popular
+                        ? 'bg-emerald-500 text-white hover:bg-emerald-600 hover:shadow-xl hover:-translate-y-0.5'
+                        : 'bg-slate-100 text-blue-900 hover:bg-slate-200'
+                    }`}
+                  >
+                    Get Connected
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ============ WHY CHOOSE US ============ */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-white">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-50">
         <div className="max-w-7xl mx-auto">
           <div className="max-w-2xl mb-12 sm:mb-16">
             <p className="text-blue-600 font-semibold tracking-widest text-xs sm:text-sm">WHY ULTRAFYFIBERNET</p>
@@ -108,7 +189,7 @@ export default function Home() {
               { icon: Headset, title: "Local support", desc: "Talk to a real technician based in Thika, not a call centre script in another county." },
               { icon: MapPin, title: "Same-day install", desc: "Order before noon and most homes in our coverage zone are online by evening." },
             ].map((item, i) => (
-              <div key={i} className="group bg-slate-50 rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-slate-100 hover:shadow-lg transition-all duration-300">
+              <div key={i} className="group bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-slate-100 hover:shadow-lg transition-all duration-300">
                 <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-blue-950 flex items-center justify-center mb-4 sm:mb-5 group-hover:bg-blue-600 transition-colors duration-300">
                   <item.icon className="w-6 h-6 sm:w-7 sm:h-7 text-yellow-400" />
                 </div>
@@ -121,7 +202,7 @@ export default function Home() {
       </section>
 
       {/* ============ HOW IT WORKS ============ */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-50">
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="max-w-2xl mb-12 sm:mb-16">
             <p className="text-blue-600 font-semibold tracking-widest text-xs sm:text-sm">GETTING STARTED</p>
@@ -135,10 +216,10 @@ export default function Home() {
 
             {[
               { step: "1", title: "Check coverage", desc: "Tell us your location in Thika and we'll confirm if your home or business is within our fibre zone." },
-              { step: "2", title: "Pick a package", desc: "Choose the speed that fits your household, from 5 Mbps starter plans to 30 Mbps for heavy streaming and gaming." },
+              { step: "2", title: "Pick a package", desc: "Choose the speed that fits your household, from 5 Mbps starter plans to 30 Mbps for heavy streaming." },
               { step: "3", title: "We install for free", desc: "Our technician sets up your router and runs the line — most installs take under two hours. Plus, get 1 month free!" },
             ].map((item, i) => (
-              <div key={i} className="relative bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-100">
+              <div key={i} className="relative bg-slate-50 rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-100">
                 <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-blue-950 text-yellow-400 font-extrabold text-base sm:text-lg flex items-center justify-center mb-4 sm:mb-5 relative z-10">
                   {item.step}
                 </div>
@@ -151,7 +232,7 @@ export default function Home() {
       </section>
 
       {/* ============ COVERAGE - Thika Areas ============ */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-blue-950 text-white relative overflow-hidden">
+      <section id="coverage" className="py-16 sm:py-24 px-4 sm:px-6 bg-blue-950 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(#ffffff10_1px,transparent_1px)] bg-[length:32px_32px]" />
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
@@ -241,34 +322,4 @@ export default function Home() {
 
       {/* ============ CONTACT CTA ============ */}
       <section id="contact" className="py-16 sm:py-24 px-4 sm:px-6 bg-gradient-to-br from-blue-600 to-blue-700 text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(#ffffff15_1px,transparent_1px)] bg-[length:40px_40px]" />
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-4 sm:mb-6">
-            Ready to get UltrafyFiberNet?
-          </h2>
-          <p className="text-blue-50 text-base sm:text-lg max-w-xl mx-auto mb-8 sm:mb-10 leading-relaxed">
-            Tell us where you are in Thika and we'll let you know if you're in our coverage zone — most homes hear back within the hour.
-          </p>
-          <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
-            <a
-              href="tel:0700541561"
-              className="bg-white text-blue-700 font-bold px-6 sm:px-10 py-3 sm:py-4 rounded-full text-sm sm:text-lg hover:bg-yellow-400 hover:text-blue-950 transition-all duration-300 flex items-center gap-2 sm:gap-3"
-            >
-              <Phone className="w-4 h-4 sm:w-5 sm:h-5" />
-              Call 0700 541 561
-            </a>
-            <a
-              href="https://wa.me/254703199691"
-              className="border-2 border-white/80 hover:border-white font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-full text-sm sm:text-lg hover:bg-white/10 transition-all duration-300"
-            >
-              Chat on WhatsApp
-            </a>
-          </div>
-          <p className="text-blue-200 text-xs sm:text-sm mt-4">
-            WhatsApp: 0703 199 691
-          </p>
-        </div>
-      </section>
-    </div>
-  );
-}
+        <div className="absolute inset-0 bg-[radial-gradient(
