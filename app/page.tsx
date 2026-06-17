@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Phone, Wifi, Zap, ShieldCheck, Headset, MapPin, Star, ChevronRight, Check } from 'lucide-react';
+import { Phone, Wifi, Zap, ShieldCheck, Headset, MapPin, Star, ChevronRight } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -37,7 +37,7 @@ export default function Home() {
               {/* Offer Banner */}
               <div className="bg-yellow-400/20 backdrop-blur-md border border-yellow-400/30 rounded-2xl px-4 sm:px-6 py-3 sm:py-4 text-center">
                 <p className="text-yellow-200 font-bold text-sm sm:text-base">
-                  🎉 SPECIAL OFFER: Get 1 Month Free After Installation
+                  SPECIAL OFFER: Get 1 Month Free After Installation
                 </p>
                 <p className="text-blue-100 text-xs sm:text-sm mt-1">Limited time offer — available for all packages</p>
               </div>
@@ -45,10 +45,10 @@ export default function Home() {
               {/* Packages - Mobile Responsive Grid */}
               <div className="grid grid-cols-4 gap-2 sm:gap-4 pt-2 sm:pt-4">
                 {[
-                  { speed: "8", price: "1,000", accent: "from-emerald-500 to-emerald-400" },
-                  { speed: "15", price: "2,000", accent: "from-blue-500 to-cyan-400" },
-                  { speed: "30", price: "3,000", accent: "from-purple-500 to-violet-400" },
-                  { speed: "50", price: "4,000", accent: "from-orange-500 to-amber-400" },
+                  { speed: "5", price: "1,000", accent: "from-emerald-500 to-emerald-400" },
+                  { speed: "8", price: "1,500", accent: "from-blue-500 to-cyan-400" },
+                  { speed: "15", price: "2,000", accent: "from-purple-500 to-violet-400" },
+                  { speed: "30", price: "3,000", accent: "from-orange-500 to-amber-400" },
                 ].map((pkg, i) => (
                   <div
                     key={i}
@@ -135,7 +135,7 @@ export default function Home() {
 
             {[
               { step: "1", title: "Check coverage", desc: "Tell us your location in Thika and we'll confirm if your home or business is within our fibre zone." },
-              { step: "2", title: "Pick a package", desc: "Choose the speed that fits your household, from 8 Mbps starter plans to 50 Mbps for heavy streaming and gaming." },
+              { step: "2", title: "Pick a package", desc: "Choose the speed that fits your household, from 5 Mbps starter plans to 30 Mbps for heavy streaming and gaming." },
               { step: "3", title: "We install for free", desc: "Our technician sets up your router and runs the line — most installs take under two hours. Plus, get 1 month free!" },
             ].map((item, i) => (
               <div key={i} className="relative bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-100">
@@ -271,4 +271,4 @@ export default function Home() {
       </section>
     </div>
   );
-                  }
+}
