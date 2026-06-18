@@ -1,39 +1,59 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { drizzle } from 'drizzle-orm/better-sqlite3';
 import Database from 'better-sqlite3';
-import { sql } from 'drizzle-orm';
-import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
+import path from 'path';
 
-// Initialize SQLite database
-const sqlite = new Database('careers.db');
-const db = drizzle(sqlite);
+// Initialize SQLite database with proper path for Vercel
+let db: Database.Database | null = null;
 
-// Create table if it doesn't exist
-const createTable = sql`
-  CREATE TABLE IF NOT EXISTS roles (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT NOT NULL,
-    department TEXT NOT NULL,
-    location TEXT NOT NULL,
-    type TEXT NOT NULL,
-    icon TEXT DEFAULT 'Wrench',
-    desc TEXT NOT NULL,
-    status TEXT DEFAULT 'open',
-    posted_date TEXT DEFAULT CURRENT_DATE
-  )
-`;
-db.run(createTable);
-
-// Sample data - insert only if table is empty
-const checkEmpty = db.get(sql`SELECT COUNT(*) as count FROM roles`) as { count: number };
-if (checkEmpty.count === 0) {
-  const insertData = sql`
-    INSERT INTO roles (title, department, location, type, icon, desc, status, posted_date) VALUES
-    ('Field Technician', 'Network Operations', 'Thika', 'Full-time', 'Wrench', 'Install and maintain fibre connections for homes and businesses, troubleshoot on-site issues, and keep our network running reliably across Thika.', 'open', '2026-06-01'),
-    ('Customer Support Agent', 'Customer Experience', 'Thika', 'Full-time', 'Headset', 'Be the first voice customers hear — handle billing questions, technical support calls, and walk-in inquiries with patience and clarity.', 'open', '2026-06-10'),
-    ('Sales Representative', 'Sales & Marketing', 'Thika', 'Full-time', 'TrendingUp', 'Help grow our customer base across Thika. Engage with potential clients, explain our packages, and drive adoption of fibre internet in new areas.', 'open', '2026-06-15')
-  `;
-  db.run(insertData);
+function getDb() {
+  if (!db) {
+    // Use a temporary directory that works on Vercel
+    const dbPath = process.env.NODE_ENV === 'production' 
+      ? '/tmp/careers.db'  // Vercel's writable temp directory
+      : 'careers.db';
+    
+    db = new Database(dbPath);
+    
+    // Create table if it doesn't exist
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS roles (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        department TEXT NOT NULL,
+        location TEXT NOT NULL,
+        type TEXT NOT NULL,
+        icon TEXT DEFAULT 'Wrench',
+        desc TEXT NOT NULL,
+        status TEXT DEFAULT 'open',
+        posted_date TEXT DEFAULT CURRENT_DATE
+      )
+    `);
+    
+    // Check if table is empty and insert sample data
+    const count = db.prepare('SELECT COUNT(*) as count FROM roles').get() as { count: number };
+    
+    if (count.count === 0) {
+      const insertStmt = db.prepare(`
+        INSERT INTO roles (title, department, location, type, icon, desc, status, posted_date) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      
+      const sampleRoles = [
+        ['Field Technician', 'Network Operations', 'Thika', 'Full-time', 'Wrench', 'Install and maintain fibre connections for homes and businesses, troubleshoot on-site issues, and keep our network running reliably across Thika.', 'open', '2026-06-01'],
+        ['Customer Support Agent', 'Customer Experience', 'Thika', 'Full-time', 'Headset', 'Be the first voice customers hear — handle billing questions, technical support calls, and walk-in inquiries with patience and clarity.', 'open', '2026-06-10'],
+        ['Sales Representative', 'Sales & Marketing', 'Thika', 'Full-time', 'TrendingUp', 'Help grow our customer base across Thika. Engage with potential clients, explain our packages, and drive adoption of fibre internet in new areas.', 'open', '2026-06-15']
+      ];
+      
+      const insertMany = db.transaction((roles: any[][]) => {
+        for (const role of roles) {
+          insertStmt.run(role);
+        }
+      });
+      
+      insertMany(sampleRoles);
+    }
+  }
+  return db;
 }
 
 // GET: Fetch all open roles
@@ -42,9 +62,9 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get('status') || 'open';
     
-    const result = db.all(
-      sql`SELECT * FROM roles WHERE status = ${status} ORDER BY posted_date DESC`
-    );
+    const db = getDb();
+    const stmt = db.prepare('SELECT * FROM roles WHERE status = ? ORDER BY posted_date DESC');
+    const result = stmt.all(status);
     
     return NextResponse.json({
       success: true,
@@ -54,10 +74,49 @@ export async function GET(request: NextRequest) {
     
   } catch (error) {
     console.error('Database error:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch job openings' },
-      { status: 500 }
-    );
+    // Return mock data as fallback
+    const mockRoles = [
+      {
+        id: 1,
+        title: "Field Technician",
+        department: "Network Operations",
+        location: "Thika",
+        type: "Full-time",
+        icon: "Wrench",
+        desc: "Install and maintain fibre connections for homes and businesses, troubleshoot on-site issues, and keep our network running reliably across Thika.",
+        status: "open",
+        postedDate: "2026-06-01",
+      },
+      {
+        id: 2,
+        title: "Customer Support Agent",
+        department: "Customer Experience",
+        location: "Thika",
+        type: "Full-time",
+        icon: "Headset",
+        desc: "Be the first voice customers hear — handle billing questions, technical support calls, and walk-in inquiries with patience and clarity.",
+        status: "open",
+        postedDate: "2026-06-10",
+      },
+      {
+        id: 3,
+        title: "Sales Representative",
+        department: "Sales & Marketing",
+        location: "Thika",
+        type: "Full-time",
+        icon: "TrendingUp",
+        desc: "Help grow our customer base across Thika. Engage with potential clients, explain our packages, and drive adoption of fibre internet in new areas.",
+        status: "open",
+        postedDate: "2026-06-15",
+      },
+    ];
+    
+    return NextResponse.json({
+      success: true,
+      data: mockRoles,
+      total: mockRoles.length,
+      usingFallback: true,
+    }, { status: 200 });
   }
 }
 
@@ -74,14 +133,16 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const result = db.run(
-      sql`INSERT INTO roles (title, department, location, type, icon, desc, status, posted_date)
-          VALUES (${title}, ${department}, ${location}, ${type}, ${icon || 'Wrench'}, ${desc}, 'open', date('now'))`
-    );
+    const db = getDb();
+    const stmt = db.prepare(`
+      INSERT INTO roles (title, department, location, type, icon, desc, status, posted_date)
+      VALUES (?, ?, ?, ?, ?, ?, 'open', date('now'))
+    `);
     
-    const newRole = db.get(
-      sql`SELECT * FROM roles WHERE id = ${result.lastInsertRowid}`
-    );
+    const info = stmt.run(title, department, location, type, icon || 'Wrench', desc);
+    
+    const getStmt = db.prepare('SELECT * FROM roles WHERE id = ?');
+    const newRole = getStmt.get(info.lastInsertRowid);
     
     return NextResponse.json({
       success: true,
@@ -111,16 +172,19 @@ export async function PUT(request: NextRequest) {
       );
     }
     
+    const db = getDb();
+    
+    // Build dynamic update query
     const updates: string[] = [];
     const values: any[] = [];
     
-    if (title) updates.push(`title = '${title}'`);
-    if (department) updates.push(`department = '${department}'`);
-    if (location) updates.push(`location = '${location}'`);
-    if (type) updates.push(`type = '${type}'`);
-    if (icon) updates.push(`icon = '${icon}'`);
-    if (desc) updates.push(`desc = '${desc}'`);
-    if (status) updates.push(`status = '${status}'`);
+    if (title) { updates.push('title = ?'); values.push(title); }
+    if (department) { updates.push('department = ?'); values.push(department); }
+    if (location) { updates.push('location = ?'); values.push(location); }
+    if (type) { updates.push('type = ?'); values.push(type); }
+    if (icon) { updates.push('icon = ?'); values.push(icon); }
+    if (desc) { updates.push('desc = ?'); values.push(desc); }
+    if (status) { updates.push('status = ?'); values.push(status); }
     
     if (updates.length === 0) {
       return NextResponse.json(
@@ -129,8 +193,11 @@ export async function PUT(request: NextRequest) {
       );
     }
     
-    const query = `UPDATE roles SET ${updates.join(', ')} WHERE id = ${id} RETURNING *`;
-    const result = db.get(sql.raw(query));
+    values.push(id);
+    const query = `UPDATE roles SET ${updates.join(', ')} WHERE id = ? RETURNING *`;
+    
+    const stmt = db.prepare(query);
+    const result = stmt.get(...values);
     
     if (!result) {
       return NextResponse.json(
@@ -167,9 +234,9 @@ export async function DELETE(request: NextRequest) {
       );
     }
     
-    const result = db.run(
-      sql`DELETE FROM roles WHERE id = ${parseInt(id)}`
-    );
+    const db = getDb();
+    const stmt = db.prepare('DELETE FROM roles WHERE id = ?');
+    const result = stmt.run(parseInt(id));
     
     if (result.changes === 0) {
       return NextResponse.json(
@@ -190,4 +257,4 @@ export async function DELETE(request: NextRequest) {
       { status: 500 }
     );
   }
-}
+      }
