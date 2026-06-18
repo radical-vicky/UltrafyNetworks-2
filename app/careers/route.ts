@@ -1,194 +1,179 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Pool } from 'pg';
 
-// This would typically come from your database
-// For now, we'll use a mock data source
-const rolesData = [
-  {
-    id: 1,
-    title: "Field Technician",
-    department: "Network Operations",
-    location: "Thika",
-    type: "Full-time",
-    icon: "Wrench",
-    desc: "Install and maintain fibre connections for homes and businesses, troubleshoot on-site issues, and keep our network running reliably across Thika.",
-    status: "open",
-    postedDate: "2026-06-01",
-  },
-  {
-    id: 2,
-    title: "Customer Support Agent",
-    department: "Customer Experience",
-    location: "Thika",
-    type: "Full-time",
-    icon: "Headset",
-    desc: "Be the first voice customers hear — handle billing questions, technical support calls, and walk-in inquiries with patience and clarity.",
-    status: "open",
-    postedDate: "2026-06-10",
-  },
-  {
-    id: 3,
-    title: "Sales Representative",
-    department: "Sales & Marketing",
-    location: "Thika",
-    type: "Full-time",
-    icon: "TrendingUp",
-    desc: "Help grow our customer base across Thika. Engage with potential clients, explain our packages, and drive adoption of fibre internet in new areas.",
-    status: "open",
-    postedDate: "2026-06-15",
-  },
-];
+// Create a connection pool
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  // Optional: Add SSL configuration if needed
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+});
 
 // GET: Fetch all open roles
 export async function GET(request: NextRequest) {
+  let client;
   try {
     const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status');
+    const status = searchParams.get('status') || 'open';
     
-    let roles = rolesData;
-    
-    // Filter by status if provided
-    if (status) {
-      roles = rolesData.filter(role => role.status === status);
-    }
+    client = await pool.connect();
+    const result = await client.query(
+      'SELECT * FROM roles WHERE status = $1 ORDER BY posted_date DESC',
+      [status]
+    );
     
     return NextResponse.json({
       success: true,
-      data: roles,
-      total: roles.length,
+      data: result.rows,
+      total: result.rowCount,
     }, { status: 200 });
     
   } catch (error) {
+    console.error('Database error:', error);
     return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Failed to fetch job openings' 
-      },
+      { success: false, error: 'Failed to fetch job openings' },
       { status: 500 }
     );
+  } finally {
+    if (client) client.release();
   }
 }
 
-// POST: Create a new job opening (admin only)
+// POST: Create a new job opening
 export async function POST(request: NextRequest) {
+  let client;
   try {
     const body = await request.json();
+    const { title, department, location, type, icon, desc } = body;
     
     // Validate required fields
-    const { title, department, location, type, desc } = body;
-    
     if (!title || !department || !location || !type || !desc) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Missing required fields: title, department, location, type, desc' 
-        },
+        { success: false, error: 'Missing required fields' },
         { status: 400 }
       );
     }
     
-    // In a real app, you would save to database
-    const newRole = {
-      id: rolesData.length + 1,
-      ...body,
-      status: 'open',
-      postedDate: new Date().toISOString().split('T')[0],
-    };
-    
-    rolesData.push(newRole);
+    client = await pool.connect();
+    const result = await client.query(
+      `INSERT INTO roles (title, department, location, type, icon, desc, status, posted_date)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       RETURNING *`,
+      [title, department, location, type, icon || 'Wrench', desc, 'open', new Date().toISOString().split('T')[0]]
+    );
     
     return NextResponse.json({
       success: true,
-      data: newRole,
+      data: result.rows[0],
       message: 'Job opening created successfully',
     }, { status: 201 });
     
   } catch (error) {
+    console.error('Database error:', error);
     return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Failed to create job opening' 
-      },
+      { success: false, error: 'Failed to create job opening' },
       { status: 500 }
     );
+  } finally {
+    if (client) client.release();
   }
 }
 
-// PUT: Update a job opening (admin only)
+// PUT: Update an existing job opening
 export async function PUT(request: NextRequest) {
+  let client;
   try {
     const body = await request.json();
-    const { id, ...updates } = body;
+    const { id, title, department, location, type, icon, desc, status } = body;
     
     if (!id) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Role ID is required' 
-        },
+        { success: false, error: 'Role ID is required' },
         { status: 400 }
       );
     }
     
-    const index = rolesData.findIndex(role => role.id === id);
+    client = await pool.connect();
     
-    if (index === -1) {
+    // Build dynamic update query
+    const updates: string[] = [];
+    const values: any[] = [];
+    let paramIndex = 1;
+    
+    if (title) { updates.push(`title = $${paramIndex++}`); values.push(title); }
+    if (department) { updates.push(`department = $${paramIndex++}`); values.push(department); }
+    if (location) { updates.push(`location = $${paramIndex++}`); values.push(location); }
+    if (type) { updates.push(`type = $${paramIndex++}`); values.push(type); }
+    if (icon) { updates.push(`icon = $${paramIndex++}`); values.push(icon); }
+    if (desc) { updates.push(`desc = $${paramIndex++}`); values.push(desc); }
+    if (status) { updates.push(`status = $${paramIndex++}`); values.push(status); }
+    
+    if (updates.length === 0) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Role not found' 
-        },
+        { success: false, error: 'No fields to update' },
+        { status: 400 }
+      );
+    }
+    
+    values.push(id);
+    const query = `
+      UPDATE roles 
+      SET ${updates.join(', ')}
+      WHERE id = $${paramIndex}
+      RETURNING *
+    `;
+    
+    const result = await client.query(query, values);
+    
+    if (result.rowCount === 0) {
+      return NextResponse.json(
+        { success: false, error: 'Role not found' },
         { status: 404 }
       );
     }
     
-    rolesData[index] = { ...rolesData[index], ...updates };
-    
     return NextResponse.json({
       success: true,
-      data: rolesData[index],
+      data: result.rows[0],
       message: 'Job opening updated successfully',
     }, { status: 200 });
     
   } catch (error) {
+    console.error('Database error:', error);
     return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Failed to update job opening' 
-      },
+      { success: false, error: 'Failed to update job opening' },
       { status: 500 }
     );
+  } finally {
+    if (client) client.release();
   }
 }
 
-// DELETE: Remove a job opening (admin only)
+// DELETE: Remove a job opening
 export async function DELETE(request: NextRequest) {
+  let client;
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     
     if (!id) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Role ID is required' 
-        },
+        { success: false, error: 'Role ID is required' },
         { status: 400 }
       );
     }
     
-    const index = rolesData.findIndex(role => role.id === parseInt(id));
+    client = await pool.connect();
+    const result = await client.query(
+      'DELETE FROM roles WHERE id = $1 RETURNING id',
+      [parseInt(id)]
+    );
     
-    if (index === -1) {
+    if (result.rowCount === 0) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Role not found' 
-        },
+        { success: false, error: 'Role not found' },
         { status: 404 }
       );
     }
-    
-    rolesData.splice(index, 1);
     
     return NextResponse.json({
       success: true,
@@ -196,12 +181,12 @@ export async function DELETE(request: NextRequest) {
     }, { status: 200 });
     
   } catch (error) {
+    console.error('Database error:', error);
     return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Failed to delete job opening' 
-      },
+      { success: false, error: 'Failed to delete job opening' },
       { status: 500 }
     );
+  } finally {
+    if (client) client.release();
   }
-}
+      }
