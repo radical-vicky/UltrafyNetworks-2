@@ -24,18 +24,26 @@ const openRoles: Role[] = [
   {
     title: "Field Technician",
     department: "Network Operations",
-    location: "Nyahururu",
+    location: "Thika",
     type: "Full-time",
     icon: Wrench,
-    desc: "Install and maintain fibre connections for homes and businesses, troubleshoot on-site issues, and keep our network running reliably across Nyahururu.",
+    desc: "Install and maintain fibre connections for homes and businesses, troubleshoot on-site issues, and keep our network running reliably across Thika.",
   },
   {
     title: "Customer Support Agent",
     department: "Customer Experience",
-    location: "Nyahururu",
+    location: "Thika",
     type: "Full-time",
     icon: Headset,
     desc: "Be the first voice customers hear — handle billing questions, technical support calls, and walk-in inquiries with patience and clarity.",
+  },
+  {
+    title: "Sales Representative",
+    department: "Sales & Marketing",
+    location: "Thika",
+    type: "Full-time",
+    icon: TrendingUp,
+    desc: "Help grow our customer base across Thika. Engage with potential clients, explain our packages, and drive adoption of fibre internet in new areas.",
   },
 ];
 
@@ -53,52 +61,52 @@ export default function CareersPage() {
       {/* ============ HEADER ============ */}
       <div className="relative bg-blue-950 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(#ffffff12_1px,transparent_1px)] bg-[length:36px_36px]" />
-        <div className="absolute -top-24 -right-24 w-72 h-72 bg-red-600/30 rounded-full blur-3xl" />
+        <div className="absolute -top-24 -right-24 w-72 h-72 bg-emerald-500/30 rounded-full blur-3xl" />
         <div className="absolute -bottom-32 -left-16 w-72 h-72 bg-yellow-400/10 rounded-full blur-3xl" />
 
-        <div className="max-w-6xl mx-auto px-6 py-20 relative z-10">
-          <p className="text-yellow-400 font-semibold tracking-widest text-sm">CAREERS</p>
-          <h1 className="text-4xl lg:text-5xl font-extrabold text-white mt-3 max-w-2xl leading-tight">
-            Help us keep Nyahururu connected
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20 relative z-10">
+          <p className="text-yellow-400 font-semibold tracking-widest text-xs sm:text-sm">CAREERS</p>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mt-2 sm:mt-3 max-w-2xl leading-tight">
+            Help us keep Thika connected
           </h1>
-          <p className="text-blue-100 mt-4 max-w-xl leading-relaxed">
+          <p className="text-blue-100 text-sm sm:text-base mt-3 sm:mt-4 max-w-xl leading-relaxed">
             We're a growing local team building the internet, power, and security infrastructure our community relies on. Come build it with us.
           </p>
         </div>
       </div>
 
       {/* ============ OPEN ROLES ============ */}
-      <section className="py-20 px-6 bg-white">
+      <section className="py-12 sm:py-20 px-4 sm:px-6 bg-white">
         <div className="max-w-5xl mx-auto">
-          <p className="text-red-600 font-semibold tracking-widest text-sm">OPEN ROLES</p>
-          <h2 className="text-3xl lg:text-4xl font-extrabold text-blue-950 mt-3 mb-10 max-w-xl">
+          <p className="text-emerald-600 font-semibold tracking-widest text-xs sm:text-sm">OPEN ROLES</p>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-blue-950 mt-2 sm:mt-3 mb-6 sm:mb-10 max-w-xl">
             Current openings
           </h2>
 
-          <div className="space-y-5">
+          <div className="space-y-4 sm:space-y-5">
             {openRoles.map((role, i) => (
               <div
                 key={i}
-                className="bg-slate-50 rounded-3xl border border-slate-100 p-7 hover:shadow-lg transition-all duration-300 flex flex-col sm:flex-row sm:items-center gap-6"
+                className="bg-slate-50 rounded-2xl sm:rounded-3xl border border-slate-100 p-5 sm:p-7 hover:shadow-lg transition-all duration-300 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6"
               >
-                <div className="w-14 h-14 rounded-2xl bg-blue-950 flex items-center justify-center shrink-0">
-                  <role.icon className="w-7 h-7 text-yellow-400" />
+                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-blue-950 flex items-center justify-center shrink-0">
+                  <role.icon className="w-6 h-6 sm:w-7 sm:h-7 text-yellow-400" />
                 </div>
 
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold text-blue-950">{role.title}</h3>
-                  <p className="text-slate-600 text-sm leading-relaxed mt-2 mb-3 max-w-2xl">{role.desc}</p>
-                  <div className="flex flex-wrap gap-3 text-xs font-medium text-slate-500">
-                    <span className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-full px-3 py-1.5">
-                      <Briefcase className="w-3.5 h-3.5" />
+                  <h3 className="text-lg sm:text-xl font-bold text-blue-950">{role.title}</h3>
+                  <p className="text-slate-600 text-xs sm:text-sm leading-relaxed mt-1 sm:mt-2 mb-2 sm:mb-3 max-w-2xl">{role.desc}</p>
+                  <div className="flex flex-wrap gap-2 sm:gap-3 text-[10px] sm:text-xs font-medium text-slate-500">
+                    <span className="flex items-center gap-1 sm:gap-1.5 bg-white border border-slate-200 rounded-full px-2 sm:px-3 py-1 sm:py-1.5">
+                      <Briefcase className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                       {role.department}
                     </span>
-                    <span className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-full px-3 py-1.5">
-                      <MapPin className="w-3.5 h-3.5" />
+                    <span className="flex items-center gap-1 sm:gap-1.5 bg-white border border-slate-200 rounded-full px-2 sm:px-3 py-1 sm:py-1.5">
+                      <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                       {role.location}
                     </span>
-                    <span className="flex items-center gap-1.5 bg-white border border-slate-200 rounded-full px-3 py-1.5">
-                      <Clock className="w-3.5 h-3.5" />
+                    <span className="flex items-center gap-1 sm:gap-1.5 bg-white border border-slate-200 rounded-full px-2 sm:px-3 py-1 sm:py-1.5">
+                      <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                       {role.type}
                     </span>
                   </div>
@@ -106,7 +114,7 @@ export default function CareersPage() {
 
                 <Link
                   href="/contact"
-                  className="bg-blue-950 hover:bg-red-600 text-white font-semibold px-6 py-3 rounded-xl transition-colors text-center shrink-0"
+                  className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl transition-colors text-center shrink-0 text-sm sm:text-base"
                 >
                   Apply now
                 </Link>
@@ -117,21 +125,21 @@ export default function CareersPage() {
       </section>
 
       {/* ============ WHY JOIN US ============ */}
-      <section className="py-20 px-6 bg-slate-50">
+      <section className="py-12 sm:py-20 px-4 sm:px-6 bg-slate-50">
         <div className="max-w-6xl mx-auto">
-          <p className="text-red-600 font-semibold tracking-widest text-sm">WHY JOIN US</p>
-          <h2 className="text-3xl lg:text-4xl font-extrabold text-blue-950 mt-3 mb-10 max-w-xl">
+          <p className="text-emerald-600 font-semibold tracking-widest text-xs sm:text-sm">WHY JOIN US</p>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-blue-950 mt-2 sm:mt-3 mb-6 sm:mb-10 max-w-xl">
             What it's like working here
           </h2>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {perks.map((perk, i) => (
-              <div key={i} className="bg-white rounded-3xl border border-slate-100 p-7">
-                <div className="w-12 h-12 rounded-2xl bg-blue-950 flex items-center justify-center mb-5">
-                  <perk.icon className="w-6 h-6 text-yellow-400" />
+              <div key={i} className="bg-white rounded-2xl sm:rounded-3xl border border-slate-100 p-5 sm:p-7">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-blue-950 flex items-center justify-center mb-3 sm:mb-5">
+                  <perk.icon className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-400" />
                 </div>
-                <h3 className="text-lg font-bold text-blue-950 mb-2">{perk.title}</h3>
-                <p className="text-slate-600 text-sm leading-relaxed">{perk.desc}</p>
+                <h3 className="text-base sm:text-lg font-bold text-blue-950 mb-1 sm:mb-2">{perk.title}</h3>
+                <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">{perk.desc}</p>
               </div>
             ))}
           </div>
@@ -139,20 +147,20 @@ export default function CareersPage() {
       </section>
 
       {/* ============ GENERAL APPLICATION ============ */}
-      <section className="py-20 px-6 bg-white">
+      <section className="py-12 sm:py-20 px-4 sm:px-6 bg-white">
         <div className="max-w-3xl mx-auto text-center">
-          <div className="w-14 h-14 rounded-2xl bg-blue-950 flex items-center justify-center mx-auto mb-6">
-            <Users className="w-7 h-7 text-yellow-400" />
+          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-blue-950 flex items-center justify-center mx-auto mb-4 sm:mb-6">
+            <Users className="w-6 h-6 sm:w-7 sm:h-7 text-yellow-400" />
           </div>
-          <h2 className="text-3xl lg:text-4xl font-extrabold text-blue-950 mb-4">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-blue-950 mb-3 sm:mb-4">
             Don't see a role that fits?
           </h2>
-          <p className="text-slate-600 text-lg leading-relaxed mb-9 max-w-xl mx-auto">
+          <p className="text-slate-600 text-sm sm:text-lg leading-relaxed mb-6 sm:mb-9 max-w-xl mx-auto">
             We're growing fast and always interested in meeting skilled people across technical, sales, and support roles. Send us your details and we'll reach out when something opens up.
           </p>
           <Link
             href="/contact"
-            className="inline-block bg-red-600 hover:bg-red-700 text-white font-bold px-10 py-4 rounded-full text-lg transition-all duration-300 shadow-lg shadow-red-600/20"
+            className="inline-block bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-8 sm:px-10 py-3 sm:py-4 rounded-full text-sm sm:text-lg transition-all duration-300 shadow-lg shadow-emerald-500/20"
           >
             Submit a general application
           </Link>
@@ -160,4 +168,4 @@ export default function CareersPage() {
       </section>
     </div>
   );
-}
+    }
