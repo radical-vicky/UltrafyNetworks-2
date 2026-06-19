@@ -27,7 +27,7 @@ const otherServices = [
     title: "Solar panel installation",
     desc: "Design and installation of solar systems sized to your home or business power needs, with battery backup options.",
     color: "bg-amber-500",
-    image: "https://images.pexels.com/photos/159397/solar-panel-array-power-sun-159397.jpeg?auto=compress&cs=tinysrgb&w=600",
+    image: "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=800&h=600&fit=crop&crop=center",
     features: ["Solar panel installation", "Battery backup systems", "System design", "Grid-tied solutions", "Off-grid systems"]
   },
   {
@@ -35,7 +35,7 @@ const otherServices = [
     title: "Electrical installation",
     desc: "Full house and commercial wiring, fault diagnosis, and certified electrical work done to code.",
     color: "bg-yellow-500",
-    image: "https://images.pexels.com/photos/4164418/pexels-photo-4164418.jpeg?auto=compress&cs=tinysrgb&w=600",
+    image: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=800&h=600&fit=crop&crop=center",
     features: ["House wiring", "Commercial wiring", "Fault diagnosis", "Certified work", "Safety compliance"]
   },
   {
@@ -43,7 +43,7 @@ const otherServices = [
     title: "CCTV installation",
     desc: "Indoor and outdoor camera systems with remote viewing on your phone, sized for homes, shops, or compounds.",
     color: "bg-slate-700",
-    image: "https://images.pexels.com/photos/3757382/pexels-photo-3757382.jpeg?auto=compress&cs=tinysrgb&w=600",
+    image: "https://images.unsplash.com/photo-1558002038-1055907df827?w=800&h=600&fit=crop&crop=center",
     features: ["HD cameras", "Remote viewing", "Night vision", "Indoor/outdoor", "24/7 monitoring"]
   },
   {
@@ -51,7 +51,7 @@ const otherServices = [
     title: "Electric fence installation",
     desc: "Perimeter security fencing with shock deterrent and alarm integration for homes and commercial premises.",
     color: "bg-red-600",
-    image: "https://images.pexels.com/photos/3768584/pexels-photo-3768584.jpeg?auto=compress&cs=tinysrgb&w=600",
+    image: "https://images.unsplash.com/photo-1582139329536-e7284fece509?w=800&h=600&fit=crop&crop=center",
     features: ["Perimeter security", "Shock deterrent", "Alarm integration", "Commercial premises", "Home security"]
   },
   {
@@ -59,7 +59,7 @@ const otherServices = [
     title: "Fire alarm systems",
     desc: "Smoke and heat detection systems with audible alerts, installed and tested to meet safety requirements.",
     color: "bg-orange-600",
-    image: "https://images.pexels.com/photos/1487027/pexels-photo-1487027.jpeg?auto=compress&cs=tinysrgb&w=600",
+    image: "https://images.unsplash.com/photo-1562311701-58c0a0f0b218?w=800&h=600&fit=crop&crop=center",
     features: ["Smoke detection", "Heat detection", "Audible alerts", "Safety compliance", "System testing"]
   },
   {
@@ -67,7 +67,7 @@ const otherServices = [
     title: "Burglar alarm systems",
     desc: "Motion-sensor and entry alarms with optional monitoring, giving you alerts the moment something's wrong.",
     color: "bg-blue-700",
-    image: "https://images.pexels.com/photos/5193646/pexels-photo-5193646.jpeg?auto=compress&cs=tinysrgb&w=600",
+    image: "https://images.unsplash.com/photo-1558002038-1055907df827?w=800&h=600&fit=crop&crop=center",
     features: ["Motion sensors", "Entry alarms", "Remote monitoring", "Instant alerts", "24/7 protection"]
   },
   {
@@ -75,7 +75,7 @@ const otherServices = [
     title: "Access Points Installation",
     desc: "Extend your network coverage with professional access point installation. Perfect for offices, hotels, and large homes.",
     color: "bg-cyan-600",
-    image: "https://images.pexels.com/photos/572056/pexels-photo-572056.jpeg?auto=compress&cs=tinysrgb&w=600",
+    image: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&h=600&fit=crop&crop=center",
     features: ["WiFi coverage extension", "Mesh network setup", "Guest WiFi", "Signal optimization", "Office network"]
   },
   {
@@ -83,7 +83,7 @@ const otherServices = [
     title: "Technical Installations",
     desc: "Professional technical installation services for all your IT and security needs. Expert technicians with years of experience.",
     color: "bg-indigo-600",
-    image: "https://images.pexels.com/photos/4164418/pexels-photo-4164418.jpeg?auto=compress&cs=tinysrgb&w=600",
+    image: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=800&h=600&fit=crop&crop=center",
     features: ["IT infrastructure", "Network cabling", "Hardware installation", "System configuration", "Technical support"]
   },
 ];
@@ -184,10 +184,13 @@ export default function ServicesPage() {
                 className="bg-white rounded-2xl sm:rounded-3xl border border-slate-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
               >
                 <div className="relative h-48 sm:h-56 bg-slate-200 overflow-hidden">
-                  <img
+                  <Image
                     src={service.image}
                     alt={service.title}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    priority={i < 4}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
                   <div className="absolute top-4 right-4 z-10">
