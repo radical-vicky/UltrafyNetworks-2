@@ -7,6 +7,7 @@ import {
   Phone, Wifi, Zap, ShieldCheck, Headset, MapPin, Star, ChevronRight, 
   Camera, Sun, ShieldAlert, Loader2 
 } from 'lucide-react';
+import ReviewForm from '@/components/ReviewForm';
 
 interface Testimonial {
   id: number;
@@ -378,8 +379,24 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ============ FAQ ============ */}
+      {/* ============ REVIEW FORM ============ */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-50">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <p className="text-emerald-600 font-semibold tracking-widest text-xs sm:text-sm">SHARE YOUR EXPERIENCE</p>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-blue-950 mt-2">
+              Tell Us About Your Experience
+            </h2>
+            <p className="text-slate-600 mt-4 max-w-xl mx-auto">
+              We value your feedback. Share your experience with UltrafyFiberNet and help others make informed decisions.
+            </p>
+          </div>
+          <ReviewForm />
+        </div>
+      </section>
+
+      {/* ============ FAQ ============ */}
+      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-white">
         <div className="max-w-4xl mx-auto">
           <div className="mb-12 sm:mb-16">
             <p className="text-blue-600 font-semibold tracking-widest text-xs sm:text-sm">QUESTIONS</p>
@@ -396,7 +413,7 @@ export default function Home() {
               { q: "What happens if I have an outage?", a: "Our network is monitored continuously. Report it through the support line and a technician is dispatched the same day for on-site issues." },
               { q: "Do you offer business packages?", a: "Yes, we work with shops, offices, and cyber cafes in Thika on custom plans — contact us for pricing." },
             ].map((item, i) => (
-              <details key={i} className="group bg-white rounded-2xl border border-slate-100 px-4 sm:px-6 py-4 sm:py-5">
+              <details key={i} className="group bg-slate-50 rounded-2xl border border-slate-100 px-4 sm:px-6 py-4 sm:py-5">
                 <summary className="flex items-center justify-between cursor-pointer font-semibold text-blue-950 list-none text-sm sm:text-base">
                   {item.q}
                   <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 group-open:rotate-90 transition-transform duration-200 flex-shrink-0 ml-4" />
