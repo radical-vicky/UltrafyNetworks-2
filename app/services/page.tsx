@@ -94,7 +94,7 @@ export default function ServicesPage() {
   return (
     <div className="min-h-screen bg-white">
 
-      {/* ============ HEADER ============ */}
+      {/* HEADER */}
       <div className="relative bg-blue-950 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(#ffffff12_1px,transparent_1px)] bg-[length:36px_36px]" />
         <div className="absolute -top-24 -right-24 w-72 h-72 bg-emerald-500/30 rounded-full blur-3xl" />
@@ -111,7 +111,7 @@ export default function ServicesPage() {
         </div>
       </div>
 
-      {/* ============ INTERNET PACKAGES ============ */}
+      {/* INTERNET PACKAGES */}
       <section className="py-12 sm:py-20 px-4 sm:px-6 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center gap-3 mb-2 sm:mb-3">
@@ -166,7 +166,7 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* ============ DYNAMIC SERVICES FROM DATABASE ============ */}
+      {/* DYNAMIC SERVICES FROM DATABASE */}
       <section className="py-12 sm:py-20 px-4 sm:px-6 bg-slate-50">
         <div className="max-w-6xl mx-auto">
           <p className="text-emerald-600 font-semibold tracking-widest text-xs sm:text-sm">INSTALLATIONS &amp; SECURITY</p>
@@ -251,7 +251,7 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* ============ ADD-ONS ============ */}
+      {/* ADD-ONS */}
       <section className="py-12 sm:py-20 px-4 sm:px-6 bg-white">
         <div className="max-w-6xl mx-auto">
           <p className="text-emerald-600 font-semibold tracking-widest text-xs sm:text-sm">ALREADY A CUSTOMER?</p>
@@ -278,7 +278,7 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* ============ CTA ============ */}
+      {/* CTA */}
       <section className="py-16 sm:py-20 px-4 sm:px-6 bg-gradient-to-br from-emerald-600 to-emerald-700 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(#ffffff15_1px,transparent_1px)] bg-[length:40px_40px]" />
         <div className="max-w-3xl mx-auto text-center relative z-10">
