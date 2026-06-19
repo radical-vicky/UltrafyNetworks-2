@@ -36,13 +36,16 @@ const iconMap: { [key: string]: any } = {
   Sun: Sun,
   Zap: Zap,
   Video: Video,
+  Camera: Video,
   ShieldAlert: ShieldAlert,
   Flame: Flame,
   Lock: Lock,
   Truck: Truck,
   ArrowUpCircle: ArrowUpCircle,
-  Camera: Video,
   Shield: ShieldAlert,
+  TrendingUp: ArrowUpCircle,
+  Headset: Phone,
+  Users: Lock,
 };
 
 const internetPackages = [
@@ -62,10 +65,6 @@ export default function ServicesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchServices();
-  }, []);
-
   const fetchServices = async () => {
     try {
       setLoading(true);
@@ -83,6 +82,10 @@ export default function ServicesPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchServices();
+  }, []);
 
   const getIcon = (iconName: string) => {
     return iconMap[iconName] || Wifi;
@@ -163,7 +166,7 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* ============ DYNAMIC SERVICES ============ */}
+      {/* ============ DYNAMIC SERVICES FROM DATABASE ============ */}
       <section className="py-12 sm:py-20 px-4 sm:px-6 bg-slate-50">
         <div className="max-w-6xl mx-auto">
           <p className="text-emerald-600 font-semibold tracking-widest text-xs sm:text-sm">INSTALLATIONS &amp; SECURITY</p>
