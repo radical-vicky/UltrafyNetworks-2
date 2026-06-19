@@ -22,6 +22,10 @@ const navLinks = [
     href: "/careers",
   },
   {
+    label: "Reviews",
+    href: "/admin/reviews",
+  },
+  {
     label: "Contact",
     href: "#contact",
   },
