@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useState, useEffect } from "react";
 import {
   Wifi,
   Sun,
@@ -12,7 +15,35 @@ import {
   ArrowUpCircle,
   Phone,
   CheckCircle2,
+  Loader2,
 } from "lucide-react";
+
+interface Service {
+  id: number;
+  title: string;
+  description: string;
+  icon: string;
+  color: string;
+  image: string;
+  category: string;
+  features: string[];
+  status: string;
+  created_at: string;
+}
+
+const iconMap: { [key: string]: any } = {
+  Wifi: Wifi,
+  Sun: Sun,
+  Zap: Zap,
+  Video: Video,
+  ShieldAlert: ShieldAlert,
+  Flame: Flame,
+  Lock: Lock,
+  Truck: Truck,
+  ArrowUpCircle: ArrowUpCircle,
+  Camera: Video,
+  Shield: ShieldAlert,
+};
 
 const internetPackages = [
   { speed: "5", price: "1,000", accent: "from-emerald-500 to-emerald-400" },
@@ -21,83 +52,46 @@ const internetPackages = [
   { speed: "30", price: "3,000", accent: "from-orange-500 to-amber-400" },
 ];
 
-const otherServices = [
-  {
-    icon: Sun,
-    title: "Solar panel installation",
-    desc: "Design and installation of solar systems sized to your home or business power needs, with battery backup options.",
-    color: "bg-amber-500",
-    image: "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=800&h=600&fit=crop&crop=center",
-    features: ["Solar panel installation", "Battery backup systems", "System design", "Grid-tied solutions", "Off-grid systems"]
-  },
-  {
-    icon: Zap,
-    title: "Electrical installation",
-    desc: "Full house and commercial wiring, fault diagnosis, and certified electrical work done to code.",
-    color: "bg-yellow-500",
-    image: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=800&h=600&fit=crop&crop=center",
-    features: ["House wiring", "Commercial wiring", "Fault diagnosis", "Certified work", "Safety compliance"]
-  },
-  {
-    icon: Video,
-    title: "CCTV installation",
-    desc: "Indoor and outdoor camera systems with remote viewing on your phone, sized for homes, shops, or compounds.",
-    color: "bg-slate-700",
-    image: "https://images.unsplash.com/photo-1558002038-1055907df827?w=800&h=600&fit=crop&crop=center",
-    features: ["HD cameras", "Remote viewing", "Night vision", "Indoor/outdoor", "24/7 monitoring"]
-  },
-  {
-    icon: ShieldAlert,
-    title: "Electric fence installation",
-    desc: "Perimeter security fencing with shock deterrent and alarm integration for homes and commercial premises.",
-    color: "bg-red-600",
-    image: "https://images.unsplash.com/photo-1582139329536-e7284fece509?w=800&h=600&fit=crop&crop=center",
-    features: ["Perimeter security", "Shock deterrent", "Alarm integration", "Commercial premises", "Home security"]
-  },
-  {
-    icon: Flame,
-    title: "Fire alarm systems",
-    desc: "Smoke and heat detection systems with audible alerts, installed and tested to meet safety requirements.",
-    color: "bg-orange-600",
-    image: "https://images.unsplash.com/photo-1562311701-58c0a0f0b218?w=800&h=600&fit=crop&crop=center",
-    features: ["Smoke detection", "Heat detection", "Audible alerts", "Safety compliance", "System testing"]
-  },
-  {
-    icon: Lock,
-    title: "Burglar alarm systems",
-    desc: "Motion-sensor and entry alarms with optional monitoring, giving you alerts the moment something's wrong.",
-    color: "bg-blue-700",
-    image: "https://images.unsplash.com/photo-1558002038-1055907df827?w=800&h=600&fit=crop&crop=center",
-    features: ["Motion sensors", "Entry alarms", "Remote monitoring", "Instant alerts", "24/7 protection"]
-  },
-  {
-    icon: Wifi,
-    title: "Access Points Installation",
-    desc: "Extend your network coverage with professional access point installation. Perfect for offices, hotels, and large homes.",
-    color: "bg-cyan-600",
-    image: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&h=600&fit=crop&crop=center",
-    features: ["WiFi coverage extension", "Mesh network setup", "Guest WiFi", "Signal optimization", "Office network"]
-  },
-  {
-    icon: ShieldAlert,
-    title: "Technical Installations",
-    desc: "Professional technical installation services for all your IT and security needs. Expert technicians with years of experience.",
-    color: "bg-indigo-600",
-    image: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=800&h=600&fit=crop&crop=center",
-    features: ["IT infrastructure", "Network cabling", "Hardware installation", "System configuration", "Technical support"]
-  },
-];
-
 const addOns = [
   { icon: Truck, title: "Relocation", desc: "Moving house? We'll transfer and reinstall your existing internet connection at the new address." },
   { icon: ArrowUpCircle, title: "Package upgrades", desc: "Outgrown your current speed? Switch to a faster plan anytime before your next billing cycle." },
 ];
 
 export default function ServicesPage() {
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchServices();
+  }, []);
+
+  const fetchServices = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/services');
+      const data = await response.json();
+      
+      if (data.success) {
+        setServices(data.data);
+      } else {
+        setError('Failed to load services');
+      }
+    } catch (err) {
+      setError('Network error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getIcon = (iconName: string) => {
+    return iconMap[iconName] || Wifi;
+  };
+
   return (
     <div className="min-h-screen bg-white">
 
-      {/* HEADER */}
+      {/* ============ HEADER ============ */}
       <div className="relative bg-blue-950 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(#ffffff12_1px,transparent_1px)] bg-[length:36px_36px]" />
         <div className="absolute -top-24 -right-24 w-72 h-72 bg-emerald-500/30 rounded-full blur-3xl" />
@@ -114,7 +108,7 @@ export default function ServicesPage() {
         </div>
       </div>
 
-      {/* INTERNET PACKAGES */}
+      {/* ============ INTERNET PACKAGES ============ */}
       <section className="py-12 sm:py-20 px-4 sm:px-6 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center gap-3 mb-2 sm:mb-3">
@@ -169,72 +163,92 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* SERVICES WITH IMAGES */}
+      {/* ============ DYNAMIC SERVICES ============ */}
       <section className="py-12 sm:py-20 px-4 sm:px-6 bg-slate-50">
         <div className="max-w-6xl mx-auto">
           <p className="text-emerald-600 font-semibold tracking-widest text-xs sm:text-sm">INSTALLATIONS &amp; SECURITY</p>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-blue-950 mt-2 sm:mt-3 mb-6 sm:mb-10 max-w-xl">
-            Solar, electrical, and security work done right
+            Professional services done right
           </h2>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {otherServices.map((service, i) => (
-              <div
-                key={i}
-                className="bg-white rounded-2xl sm:rounded-3xl border border-slate-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-              >
-                <div className="relative h-48 sm:h-56 bg-slate-200 overflow-hidden">
-                  <Image
-                    src={service.image}
-                    alt={service.title}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    priority={i < 4}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                  <div className="absolute top-4 right-4 z-10">
-                    <div className={`w-10 h-10 rounded-full ${service.color} flex items-center justify-center shadow-lg`}>
-                      <service.icon className="w-5 h-5 text-white" />
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
+              <span className="ml-3 text-slate-600">Loading services...</span>
+            </div>
+          ) : error ? (
+            <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-center">
+              {error}
+            </div>
+          ) : services.length === 0 ? (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-8 text-center">
+              <p className="text-amber-800 font-medium">No services available yet</p>
+              <p className="text-amber-700 text-sm mt-1">Check back soon for our full service list</p>
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {services.map((service) => {
+                const IconComponent = getIcon(service.icon);
+                return (
+                  <div
+                    key={service.id}
+                    className="bg-white rounded-2xl sm:rounded-3xl border border-slate-100 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+                  >
+                    <div className="relative h-48 sm:h-56 bg-slate-200 overflow-hidden">
+                      <img
+                        src={service.image || '/images/services/placeholder.jpg'}
+                        alt={service.title}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = '/images/services/placeholder.jpg';
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                      <div className="absolute top-4 right-4 z-10">
+                        <div className={`w-10 h-10 rounded-full ${service.color || 'bg-blue-500'} flex items-center justify-center shadow-lg`}>
+                          <IconComponent className="w-5 h-5 text-white" />
+                        </div>
+                      </div>
+                      <div className="absolute bottom-4 left-4 z-10">
+                        <span className="bg-black/50 backdrop-blur-sm text-white text-xs font-medium px-3 py-1.5 rounded-full">
+                          {service.category || 'Service'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="p-5 sm:p-6">
+                      <h3 className="text-lg sm:text-xl font-bold text-blue-950 mb-2">{service.title}</h3>
+                      <p className="text-slate-600 text-sm leading-relaxed mb-4">{service.description}</p>
+                      
+                      <div className="flex flex-wrap gap-1.5 mb-4">
+                        {service.features?.slice(0, 3).map((feature, idx) => (
+                          <span key={idx} className="text-[10px] bg-slate-100 text-slate-600 px-2 py-1 rounded-full">
+                            {feature}
+                          </span>
+                        ))}
+                        {service.features?.length > 3 && (
+                          <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-1 rounded-full">
+                            +{service.features.length - 3} more
+                          </span>
+                        )}
+                      </div>
+
+                      <Link
+                        href="/contact"
+                        className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
+                      >
+                        Get a quote →
+                      </Link>
                     </div>
                   </div>
-                  <div className="absolute bottom-4 left-4 z-10">
-                    <span className="bg-black/50 backdrop-blur-sm text-white text-xs font-medium px-3 py-1.5 rounded-full">
-                      {service.title}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="p-5 sm:p-6">
-                  <p className="text-slate-600 text-sm leading-relaxed mb-4">{service.desc}</p>
-                  
-                  <div className="flex flex-wrap gap-1.5 mb-4">
-                    {service.features.slice(0, 3).map((feature, idx) => (
-                      <span key={idx} className="text-[10px] bg-slate-100 text-slate-600 px-2 py-1 rounded-full">
-                        {feature}
-                      </span>
-                    ))}
-                    {service.features.length > 3 && (
-                      <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-1 rounded-full">
-                        +{service.features.length - 3} more
-                      </span>
-                    )}
-                  </div>
-
-                  <Link
-                    href="/contact"
-                    className="inline-flex items-center gap-1 text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
-                  >
-                    Get a quote →
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* ADD-ONS */}
+      {/* ============ ADD-ONS ============ */}
       <section className="py-12 sm:py-20 px-4 sm:px-6 bg-white">
         <div className="max-w-6xl mx-auto">
           <p className="text-emerald-600 font-semibold tracking-widest text-xs sm:text-sm">ALREADY A CUSTOMER?</p>
@@ -261,7 +275,7 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* CTA */}
+      {/* ============ CTA ============ */}
       <section className="py-16 sm:py-20 px-4 sm:px-6 bg-gradient-to-br from-emerald-600 to-emerald-700 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(#ffffff15_1px,transparent_1px)] bg-[length:40px_40px]" />
         <div className="max-w-3xl mx-auto text-center relative z-10">
