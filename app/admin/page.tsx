@@ -1,12 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import {
   LayoutDashboard,
-  Users,
   Star,
   Briefcase,
   Wifi,
@@ -15,19 +11,12 @@ import {
   Lock,
   Loader2,
   MessageCircle,
-  TrendingUp,
-  Camera,
-  Sun,
-  Zap,
-  Truck,
-  ArrowUpCircle,
   CheckCircle2,
   XCircle,
   Clock,
   Plus,
   Edit,
   Trash2,
-  Eye,
   Search,
   ChevronDown,
   RefreshCw,
@@ -38,34 +27,13 @@ import {
   Save,
   AlertCircle,
   ArrowLeft,
-  Home,
-  Building,
-  MapPin,
-  Calendar,
-  DollarSign,
-  Tag,
-  Layers,
-  Globe,
-  Users as UsersIcon,
-  Briefcase as BriefcaseIcon,
-  Wifi as WifiIcon,
-  ShoppingBag,
-  Package,
-  FileText,
-  CreditCard,
-  Phone,
-  Mail,
-  UserCheck,
-  UserX,
-  Filter,
-  MoreVertical,
-  Edit2,
-  Copy,
-  ExternalLink,
-  Check,
-  AlertTriangle,
-  Info,
-  PlusCircle
+  Users,
+  TrendingUp,
+  Camera,
+  Sun,
+  Zap,
+  Truck,
+  ArrowUpCircle,
 } from 'lucide-react';
 
 // ============ TYPES ============
@@ -520,6 +488,14 @@ export default function AdminDashboard() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalServices: 0,
+    activeServices: 0,
+    totalJobs: 0,
+    openJobs: 0,
+    totalReviews: 0,
+    pendingReviews: 0,
+  });
 
   // Search and filter states
   const [searchTerm, setSearchTerm] = useState('');
@@ -543,23 +519,55 @@ export default function AdminDashboard() {
   const fetchAllData = async () => {
     setLoading(true);
     try {
-      const [reviewsRes, jobsRes, servicesRes] = await Promise.all([
-        fetch('/api/admin/reviews'),
-        fetch('/api/careers/backup'),
-        fetch('/api/services'),
-      ]);
+      // Fetch all data from unified API
+      const response = await fetch('/api/admin/all-data');
+      const result = await response.json();
 
-      const reviewsData = await reviewsRes.json();
-      const jobsData = await jobsRes.json();
-      const servicesData = await servicesRes.json();
-
-      if (reviewsData.success) setReviews(reviewsData.data);
-      if (jobsData.success) setJobs(jobsData.data);
-      if (servicesData.success) setServices(servicesData.data);
+      if (result.success) {
+        setServices(result.data.services || []);
+        setJobs(result.data.careers || []);
+        setReviews(result.data.reviews || []);
+        setStats(result.totals);
+      } else {
+        // Fallback: fetch individually
+        await fetchDataIndividually();
+      }
     } catch (error) {
       console.error('Failed to fetch data:', error);
+      // Fallback: fetch individually
+      await fetchDataIndividually();
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchDataIndividually = async () => {
+    try {
+      const [servicesRes, jobsRes, reviewsRes] = await Promise.all([
+        fetch('/api/services'),
+        fetch('/api/careers/backup'),
+        fetch('/api/admin/reviews'),
+      ]);
+
+      const servicesData = await servicesRes.json();
+      const jobsData = await jobsRes.json();
+      const reviewsData = await reviewsRes.json();
+
+      if (servicesData.success) setServices(servicesData.data);
+      if (jobsData.success) setJobs(jobsData.data);
+      if (reviewsData.success) setReviews(reviewsData.data);
+
+      // Update stats
+      setStats({
+        totalServices: servicesData.data?.length || 0,
+        activeServices: servicesData.data?.filter((s: any) => s.status === 'active').length || 0,
+        totalJobs: jobsData.data?.length || 0,
+        openJobs: jobsData.data?.filter((j: any) => j.status === 'open').length || 0,
+        totalReviews: reviewsData.data?.length || 0,
+        pendingReviews: reviewsData.data?.filter((r: any) => r.status === 'pending').length || 0,
+      });
+    } catch (error) {
+      console.error('Error fetching data individually:', error);
     }
   };
 
@@ -589,7 +597,10 @@ export default function AdminDashboard() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
-    if (response.ok) { await fetchAllData(); alert('Service added successfully!'); }
+    if (response.ok) {
+      await fetchAllData();
+      alert('Service added successfully!');
+    }
   };
 
   const handleUpdateService = async (data: any) => {
@@ -598,13 +609,19 @@ export default function AdminDashboard() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
-    if (response.ok) { await fetchAllData(); alert('Service updated successfully!'); }
+    if (response.ok) {
+      await fetchAllData();
+      alert('Service updated successfully!');
+    }
   };
 
   const handleDeleteService = async (id: number) => {
     if (!confirm('Are you sure you want to delete this service?')) return;
     const response = await fetch(`/api/services?id=${id}`, { method: 'DELETE' });
-    if (response.ok) { await fetchAllData(); alert('Service deleted successfully!'); }
+    if (response.ok) {
+      await fetchAllData();
+      alert('Service deleted successfully!');
+    }
   };
 
   // Job CRUD
@@ -614,7 +631,10 @@ export default function AdminDashboard() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
-    if (response.ok) { await fetchAllData(); alert('Job added successfully!'); }
+    if (response.ok) {
+      await fetchAllData();
+      alert('Job added successfully!');
+    }
   };
 
   const handleUpdateJob = async (data: any) => {
@@ -623,13 +643,19 @@ export default function AdminDashboard() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: editingJob?.id, ...data }),
     });
-    if (response.ok) { await fetchAllData(); alert('Job updated successfully!'); }
+    if (response.ok) {
+      await fetchAllData();
+      alert('Job updated successfully!');
+    }
   };
 
   const handleDeleteJob = async (id: number) => {
     if (!confirm('Are you sure you want to delete this job?')) return;
     const response = await fetch(`/api/careers?id=${id}`, { method: 'DELETE' });
-    if (response.ok) { await fetchAllData(); alert('Job deleted successfully!'); }
+    if (response.ok) {
+      await fetchAllData();
+      alert('Job deleted successfully!');
+    }
   };
 
   // Review CRUD
@@ -639,13 +665,18 @@ export default function AdminDashboard() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, status }),
     });
-    if (response.ok) { await fetchAllData(); }
+    if (response.ok) {
+      await fetchAllData();
+    }
   };
 
   const handleDeleteReview = async (id: number) => {
     if (!confirm('Are you sure you want to delete this review?')) return;
     const response = await fetch(`/api/admin/reviews?id=${id}`, { method: 'DELETE' });
-    if (response.ok) { await fetchAllData(); alert('Review deleted successfully!'); }
+    if (response.ok) {
+      await fetchAllData();
+      alert('Review deleted successfully!');
+    }
   };
 
   // ============ LOGIN SCREEN ============
@@ -695,17 +726,6 @@ export default function AdminDashboard() {
     );
   }
 
-  // ============ STATS ============
-  const stats = {
-    totalReviews: reviews.length,
-    pendingReviews: reviews.filter(r => r.status === 'pending').length,
-    approvedReviews: reviews.filter(r => r.status === 'approved').length,
-    totalJobs: jobs.length,
-    openJobs: jobs.filter(j => j.status === 'open').length,
-    totalServices: services.length,
-    activeServices: services.filter(s => s.status === 'active').length,
-  };
-
   // ============ FILTERED DATA ============
   const filteredReviews = reviews.filter(r => 
     r.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -746,7 +766,6 @@ export default function AdminDashboard() {
       <div className="flex min-h-screen">
         {/* ===== SIDEBAR ===== */}
         <aside className={`fixed lg:static inset-y-0 left-0 z-40 w-72 bg-white border-r border-slate-100 shadow-xl transform transition-transform duration-300 ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-          {/* Logo */}
           <div className="p-6 border-b border-slate-100">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center text-white font-bold text-sm shadow-lg">
@@ -759,7 +778,6 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* Navigation */}
           <nav className="p-4 space-y-1">
             {navItems.map((item) => (
               <button
@@ -796,7 +814,6 @@ export default function AdminDashboard() {
             </div>
           </nav>
 
-          {/* Footer */}
           <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-100 bg-white/80 backdrop-blur-sm">
             <p className="text-xs text-slate-400 text-center">
               © {new Date().getFullYear()} UltrafyFiberNet
@@ -838,13 +855,12 @@ export default function AdminDashboard() {
           {/* ===== OVERVIEW TAB ===== */}
           {activeTab === 'overview' && (
             <div>
-              {/* Stats Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
                 {[
                   { label: 'Total Services', value: stats.totalServices, icon: Settings, color: 'text-blue-600' },
                   { label: 'Active Services', value: stats.activeServices, icon: CheckCircle2, color: 'text-emerald-600' },
                   { label: 'Total Jobs', value: stats.totalJobs, icon: Briefcase, color: 'text-purple-600' },
-                  { label: 'Open Jobs', value: stats.openJobs, icon: BriefcaseIcon, color: 'text-emerald-600' },
+                  { label: 'Open Jobs', value: stats.openJobs, icon: Users, color: 'text-emerald-600' },
                   { label: 'Total Reviews', value: stats.totalReviews, icon: Star, color: 'text-amber-600' },
                   { label: 'Pending Reviews', value: stats.pendingReviews, icon: Clock, color: 'text-orange-600' },
                 ].map((stat, i) => (
@@ -858,7 +874,6 @@ export default function AdminDashboard() {
                 ))}
               </div>
 
-              {/* Quick Actions */}
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 {[
                   { title: 'Add New Service', desc: 'Create a new service', icon: Plus, color: 'bg-blue-500', action: () => { setActiveTab('services'); setEditingService(null); setShowServiceModal(true); } },
