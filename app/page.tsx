@@ -9,6 +9,18 @@ import {
 } from 'lucide-react';
 import ReviewForm from '@/components/ReviewForm';
 
+interface Service {
+  id: number;
+  title: string;
+  description: string;
+  icon: string;
+  color: string;
+  image: string;
+  category: string;
+  features: string[];
+  status: string;
+}
+
 interface Testimonial {
   id: number;
   name: string;
@@ -17,28 +29,55 @@ interface Testimonial {
   rating: number;
 }
 
+const iconMap: { [key: string]: any } = {
+  Wifi: Wifi,
+  Sun: Sun,
+  Zap: Zap,
+  Video: Camera,
+  ShieldAlert: ShieldAlert,
+  Flame: ShieldAlert,
+  Lock: ShieldAlert,
+  Truck: ShieldAlert,
+  ArrowUpCircle: ShieldAlert,
+  Camera: Camera,
+  Shield: ShieldAlert,
+};
+
 export default function Home() {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchTestimonials();
+    fetchData();
   }, []);
 
-  const fetchTestimonials = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/testimonials?limit=3');
-      const data = await response.json();
       
-      if (data.success) {
-        setTestimonials(data.data);
+      // Fetch testimonials
+      const testimonialsRes = await fetch('/api/testimonials?limit=3');
+      const testimonialsData = await testimonialsRes.json();
+      if (testimonialsData.success) {
+        setTestimonials(testimonialsData.data);
+      }
+
+      // Fetch services for preview
+      const servicesRes = await fetch('/api/services?limit=4');
+      const servicesData = await servicesRes.json();
+      if (servicesData.success) {
+        setServices(servicesData.data);
       }
     } catch (error) {
-      console.error('Failed to fetch testimonials:', error);
+      console.error('Failed to fetch data:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const getIcon = (iconName: string) => {
+    return iconMap[iconName] || Wifi;
   };
 
   return (
@@ -141,22 +180,45 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { icon: Wifi, title: "Internet Installation", desc: "Fibre and wireless internet setup for homes and businesses." },
-              { icon: Camera, title: "CCTV Installation", desc: "HD surveillance systems with remote viewing access." },
-              { icon: ShieldAlert, title: "Electric Fence", desc: "Perimeter security with shock deterrent and alarm integration." },
-              { icon: Sun, title: "Solar Panels", desc: "Solar energy solutions with battery backup options." },
-            ].map((service, i) => (
-              <div key={i} className="group bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-slate-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-blue-950 flex items-center justify-center mb-4 sm:mb-5 group-hover:bg-emerald-500 transition-colors duration-300">
-                  <service.icon className="w-6 h-6 sm:w-7 sm:h-7 text-yellow-400 group-hover:text-white transition-colors duration-300" />
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
+              <span className="ml-3 text-slate-600">Loading services...</span>
+            </div>
+          ) : services.length === 0 ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {/* Fallback services if none in database */}
+              {[
+                { icon: Wifi, title: "Internet Installation", desc: "Fibre and wireless internet setup for homes and businesses." },
+                { icon: Camera, title: "CCTV Installation", desc: "HD surveillance systems with remote viewing access." },
+                { icon: ShieldAlert, title: "Electric Fence", desc: "Perimeter security with shock deterrent and alarm integration." },
+                { icon: Sun, title: "Solar Panels", desc: "Solar energy solutions with battery backup options." },
+              ].map((service, i) => (
+                <div key={i} className="group bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-slate-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-blue-950 flex items-center justify-center mb-4 sm:mb-5 group-hover:bg-emerald-500 transition-colors duration-300">
+                    <service.icon className="w-6 h-6 sm:w-7 sm:h-7 text-yellow-400 group-hover:text-white transition-colors duration-300" />
+                  </div>
+                  <h3 className="text-lg sm:text-xl font-bold text-blue-950 mb-2">{service.title}</h3>
+                  <p className="text-slate-600 text-sm leading-relaxed">{service.desc}</p>
                 </div>
-                <h3 className="text-lg sm:text-xl font-bold text-blue-950 mb-2">{service.title}</h3>
-                <p className="text-slate-600 text-sm leading-relaxed">{service.desc}</p>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {services.slice(0, 4).map((service) => {
+                const IconComponent = getIcon(service.icon);
+                return (
+                  <div key={service.id} className="group bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 border border-slate-100 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-blue-950 flex items-center justify-center mb-4 sm:mb-5 group-hover:bg-emerald-500 transition-colors duration-300">
+                      <IconComponent className="w-6 h-6 sm:w-7 sm:h-7 text-yellow-400 group-hover:text-white transition-colors duration-300" />
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-bold text-blue-950 mb-2">{service.title}</h3>
+                    <p className="text-slate-600 text-sm leading-relaxed">{service.description}</p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
           <div className="text-center mt-10">
             <Link
@@ -172,6 +234,7 @@ export default function Home() {
 
       {/* ============ PACKAGES SECTION ============ */}
       <section id="packages" className="py-16 sm:py-24 px-4 sm:px-6 bg-white">
+        {/* Keep existing packages section */}
         <div className="max-w-7xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
             <p className="text-blue-600 font-semibold tracking-widest text-xs sm:text-sm">OUR PACKAGES</p>
