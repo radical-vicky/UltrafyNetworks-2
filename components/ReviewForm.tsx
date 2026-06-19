@@ -1,10 +1,13 @@
-
 "use client";
 
 import { useState } from 'react';
 import { Star, Loader2 } from 'lucide-react';
 
-export default function ReviewForm() {
+interface ReviewFormProps {
+  onReviewSubmitted?: () => void;  // Callback to refresh testimonials
+}
+
+export default function ReviewForm({ onReviewSubmitted }: ReviewFormProps) {
   const [name, setName] = useState('');
   const [area, setArea] = useState('');
   const [quote, setQuote] = useState('');
@@ -39,7 +42,13 @@ export default function ReviewForm() {
         setArea('');
         setQuote('');
         setRating(5);
-        // Refresh testimonials after 2 seconds
+        
+        // Call the callback to refresh testimonials
+        if (onReviewSubmitted) {
+          onReviewSubmitted();
+        }
+        
+        // Also reload after 2 seconds to show the new review
         setTimeout(() => {
           window.location.reload();
         }, 2000);
@@ -62,7 +71,7 @@ export default function ReviewForm() {
           </svg>
         </div>
         <h3 className="text-xl font-bold text-emerald-800 mb-2">Thank You!</h3>
-        <p className="text-emerald-600">Your review has been submitted successfully.</p>
+        <p className="text-emerald-600">Your review has been submitted and is awaiting approval.</p>
         <p className="text-emerald-500 text-sm mt-1">Refreshing page to show updates...</p>
       </div>
     );
