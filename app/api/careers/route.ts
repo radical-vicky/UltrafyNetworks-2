@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import Database from 'better-sqlite3';
 import fs from 'fs';
 
-// Initialize database function
 function initializeDatabase() {
   const dbPath = '/tmp/careers.db';
   let db: Database.Database;
@@ -10,7 +9,6 @@ function initializeDatabase() {
   if (!fs.existsSync(dbPath)) {
     db = new Database(dbPath);
     
-    // Create table
     db.exec(`
       CREATE TABLE IF NOT EXISTS roles (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,7 +23,6 @@ function initializeDatabase() {
       )
     `);
     
-    // Insert sample data
     const insertStmt = db.prepare(`
       INSERT INTO roles (title, department, location, type, icon, desc, status, posted_date) 
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -51,7 +48,6 @@ function initializeDatabase() {
 // GET: Fetch all open roles
 export async function GET(request: NextRequest) {
   try {
-    // Ensure database exists
     initializeDatabase();
     
     const { searchParams } = new URL(request.url);
@@ -81,7 +77,6 @@ export async function GET(request: NextRequest) {
 // POST: Create a new job opening
 export async function POST(request: NextRequest) {
   try {
-    // Ensure database exists
     initializeDatabase();
     
     const body = await request.json();
@@ -125,7 +120,6 @@ export async function POST(request: NextRequest) {
 // PUT: Update an existing job opening
 export async function PUT(request: NextRequest) {
   try {
-    // Ensure database exists
     initializeDatabase();
     
     const body = await request.json();
@@ -141,7 +135,6 @@ export async function PUT(request: NextRequest) {
     const dbPath = '/tmp/careers.db';
     const db = new Database(dbPath);
     
-    // Build dynamic update query
     const updates: string[] = [];
     const values: any[] = [];
     
@@ -193,7 +186,6 @@ export async function PUT(request: NextRequest) {
 // DELETE: Remove a job opening
 export async function DELETE(request: NextRequest) {
   try {
-    // Ensure database exists
     initializeDatabase();
     
     const { searchParams } = new URL(request.url);
