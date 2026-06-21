@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+
 import { 
   Loader2, 
   Check, 
@@ -16,7 +17,15 @@ import {
   MapPin,
   Shield,
   Lock,
-  MessageCircle
+  MessageCircle,
+  Filter,
+  ArrowLeft,
+  Clock,
+  UserCheck,
+  UserX,
+  LogOut,  // ← Add this
+  EyeOff,   // ← Add this
+  AlertCircle // ← Add this
 } from 'lucide-react';
 
 interface Review {
@@ -41,9 +50,9 @@ export default function ReviewAdmin() {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
-    // Check if already authenticated via session
     const auth = sessionStorage.getItem('adminAuth');
     if (auth === 'true') {
       setIsAuthorized(true);
@@ -53,8 +62,7 @@ export default function ReviewAdmin() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Simple password protection - change this to your desired password
-    const adminPassword = 'admin123'; // Change this!
+    const adminPassword = 'admin123';
     if (password === adminPassword) {
       setIsAuthorized(true);
       sessionStorage.setItem('adminAuth', 'true');
@@ -63,6 +71,13 @@ export default function ReviewAdmin() {
     } else {
       setAuthError('Incorrect password');
     }
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('adminAuth');
+    setIsAuthorized(false);
+    setPassword('');
+    router.push('/');
   };
 
   const fetchReviews = async () => {
@@ -136,12 +151,6 @@ export default function ReviewAdmin() {
     }
   };
 
-  const handleLogout = () => {
-    sessionStorage.removeItem('adminAuth');
-    setIsAuthorized(false);
-    setPassword('');
-  };
-
   const getStatusBadge = (status: string) => {
     const styles = {
       approved: 'bg-emerald-100 text-emerald-700 border-emerald-200',
@@ -170,48 +179,56 @@ export default function ReviewAdmin() {
     return counts;
   };
 
-  // Login Screen
+  // ============ LOGIN SCREEN ============
   if (!isAuthorized) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-        <div className="bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 sm:p-8 max-w-md w-full">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-white p-4">
+        <div className="bg-white rounded-3xl shadow-2xl border border-slate-100 p-8 max-w-md w-full">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-blue-950 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Lock className="w-8 h-8 text-yellow-400" />
+            <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl">
+              <Shield className="w-10 h-10 text-yellow-400" />
             </div>
-            <h2 className="text-2xl font-bold text-blue-950">Admin Access</h2>
-            <p className="text-slate-500 text-sm mt-1">Enter password to manage reviews</p>
+            <h2 className="text-2xl font-bold text-blue-950">Review Management</h2>
+            <p className="text-slate-500 text-sm mt-1">Enter password to access reviews</p>
           </div>
-          
-          <form onSubmit={handleLogin} className="space-y-4">
+
+          <form onSubmit={handleLogin} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Password</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter admin password..."
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none transition-all"
-                autoFocus
-              />
+              <label className="block text-sm font-semibold text-slate-700 mb-2">Password</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter admin password..."
+                  className="w-full px-4 py-3.5 bg-white border-2 border-slate-300 rounded-xl focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none transition-all text-slate-900 placeholder:text-slate-500 pr-12"
+                  autoFocus
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-slate-600 transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
             </div>
-            
+
             {authError && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-sm">
+              <div className="bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-sm flex items-center gap-2">
+                <AlertCircle className="w-4 h-4" />
                 {authError}
               </div>
             )}
-            
+
             <button
               type="submit"
-              className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl transition-all duration-300"
+              className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl transition-all duration-300 shadow-lg shadow-emerald-500/20"
             >
               Access Dashboard
             </button>
-            
-            <p className="text-xs text-slate-400 text-center mt-4">
-              Protected area. Authorized personnel only.
-            </p>
+
+            <p className="text-xs text-slate-400 text-center mt-4">Protected area. Authorized personnel only.</p>
           </form>
         </div>
       </div>
@@ -232,59 +249,64 @@ export default function ReviewAdmin() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 p-3 sm:p-6 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 p-4 sm:p-6 md:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
-          <div className="w-full sm:w-auto">
-            <div className="flex items-center gap-3">
-              <span className="bg-gradient-to-r from-emerald-500 to-emerald-600 w-1.5 sm:w-2 h-8 sm:h-10 rounded-full" />
-              <div>
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-blue-950">
-                  Review Management
-                </h1>
-                <p className="text-slate-500 text-xs sm:text-sm mt-0.5">
-                  Manage customer reviews and testimonials
-                </p>
-              </div>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => router.push('/admin')}
+              className="p-2 hover:bg-slate-100 rounded-xl transition-all duration-200 group"
+            >
+              <ArrowLeft className="w-5 h-5 text-slate-500 group-hover:text-slate-700" />
+            </button>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-blue-950">
+                Review Management
+              </h1>
+              <p className="text-slate-500 text-sm mt-0.5">
+                Manage customer reviews and testimonials
+              </p>
             </div>
           </div>
           
           <div className="flex items-center gap-2 w-full sm:w-auto">
             <button
               onClick={fetchReviews}
-              className="flex items-center justify-center gap-1.5 sm:gap-2 bg-white hover:bg-slate-50 text-slate-700 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border border-slate-200 transition-all duration-200 hover:shadow-md text-xs sm:text-sm font-medium flex-1 sm:flex-none"
+              className="flex items-center justify-center gap-1.5 sm:gap-2 bg-white hover:bg-slate-50 text-slate-700 px-3 sm:px-4 py-2.5 rounded-xl border-2 border-slate-300 transition-all duration-200 hover:shadow-md text-sm font-medium flex-1 sm:flex-none"
             >
-              <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <RefreshCw className="w-4 h-4" />
               <span className="hidden xs:inline">Refresh</span>
             </button>
             <button
               onClick={handleLogout}
-              className="flex items-center justify-center gap-1.5 sm:gap-2 bg-red-50 hover:bg-red-100 text-red-600 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl border border-red-200 transition-all duration-200 text-xs sm:text-sm font-medium flex-1 sm:flex-none"
+              className="flex items-center justify-center gap-1.5 sm:gap-2 bg-red-50 hover:bg-red-100 text-red-600 px-3 sm:px-4 py-2.5 rounded-xl border-2 border-red-200 transition-all duration-200 text-sm font-medium flex-1 sm:flex-none"
             >
-              <Shield className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              <LogOut className="w-4 h-4" />
               <span className="hidden xs:inline">Logout</span>
             </button>
           </div>
         </div>
 
-        {/* Stats Cards - Mobile Responsive */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
           {[
-            { label: 'Total', value: counts.all, color: 'text-blue-950', sub: 'All reviews' },
-            { label: 'Approved', value: counts.approved, color: 'text-emerald-600', sub: '✓ Published' },
-            { label: 'Pending', value: counts.pending, color: 'text-amber-600', sub: '⏳ Awaiting' },
-            { label: 'Rejected', value: counts.rejected, color: 'text-red-600', sub: '✕ Not published' },
+            { label: 'Total', value: counts.all, color: 'text-blue-950', icon: MessageCircle },
+            { label: 'Approved', value: counts.approved, color: 'text-emerald-600', icon: UserCheck },
+            { label: 'Pending', value: counts.pending, color: 'text-amber-600', icon: Clock },
+            { label: 'Rejected', value: counts.rejected, color: 'text-red-600', icon: UserX },
           ].map((stat, i) => (
             <div key={i} className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-slate-100 p-3 sm:p-5 hover:shadow-md transition-all duration-200">
-              <p className="text-[10px] sm:text-xs text-slate-500 font-medium uppercase tracking-wider">{stat.label}</p>
-              <p className={`text-2xl sm:text-3xl font-bold ${stat.color} mt-0.5 sm:mt-1`}>{stat.value}</p>
-              <p className="text-[8px] sm:text-xs text-slate-400 mt-0.5 sm:mt-1">{stat.sub}</p>
+              <div className="flex items-center gap-2">
+                <stat.icon className={`w-4 h-4 ${stat.color}`} />
+                <p className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">{stat.label}</p>
+              </div>
+              <p className={`text-2xl sm:text-3xl font-bold ${stat.color} mt-1`}>{stat.value}</p>
             </div>
           ))}
         </div>
 
-        {/* Filters - Mobile Responsive */}
+        {/* Filters - Updated with better visibility */}
         <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-slate-100 p-3 sm:p-4 md:p-6 mb-4 sm:mb-6">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
             <div className="relative flex-1">
@@ -294,7 +316,7 @@ export default function ReviewAdmin() {
                 placeholder="Search by name, area, or review..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-8 sm:pl-10 pr-3 sm:pr-4 py-2 sm:py-3 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none transition-all text-slate-900 placeholder:text-slate-400 text-sm sm:text-base"
+                className="w-full pl-8 sm:pl-10 pr-3 sm:pr-4 py-3 bg-white border-2 border-slate-300 rounded-xl focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none transition-all text-slate-900 placeholder:text-slate-500 text-sm sm:text-base"
               />
             </div>
             
@@ -302,7 +324,7 @@ export default function ReviewAdmin() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 pr-8 sm:pr-10 rounded-xl border border-slate-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none transition-all appearance-none bg-white text-slate-700 cursor-pointer text-sm sm:text-base"
+                className="w-full px-3 sm:px-4 py-3 bg-white border-2 border-slate-300 rounded-xl focus:bg-white focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 outline-none transition-all appearance-none text-slate-900 text-sm sm:text-base"
               >
                 <option value="all">All Status</option>
                 <option value="pending">Pending</option>
@@ -316,12 +338,12 @@ export default function ReviewAdmin() {
 
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-xl p-3 sm:p-4 text-red-700 text-xs sm:text-sm mb-4 sm:mb-6 flex items-center gap-2">
-            <X className="w-4 h-4" />
+            <AlertCircle className="w-4 h-4" />
             {error}
           </div>
         )}
 
-        {/* Reviews Table - Mobile Responsive */}
+        {/* Reviews Table */}
         <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
           {filteredReviews.length === 0 ? (
             <div className="text-center py-12 sm:py-16 px-4">
@@ -341,8 +363,7 @@ export default function ReviewAdmin() {
                 <thead className="bg-slate-50 border-b border-slate-100">
                   <tr>
                     <th className="text-left px-3 sm:px-4 py-3 sm:py-4 text-slate-600 font-semibold text-[10px] sm:text-xs uppercase tracking-wider">Name</th>
-                    <th className="text-left px-3 sm:px-4 py-3 sm:py-4 text-slate-600 font-semibold text-[10px] sm:text-xs uppercase tracking-wider hidden sm:table-cell">Area</th>
-                    <th className="text-left px-3 sm:px-4 py-3 sm:py-4 text-slate-600 font-semibold text-[10px] sm:text-xs uppercase tracking-wider hidden md:table-cell">Review</th>
+                    <th className="text-left px-3 sm:px-4 py-3 sm:py-4 text-slate-600 font-semibold text-[10px] sm:text-xs uppercase tracking-wider hidden sm:table-cell">Review</th>
                     <th className="text-left px-3 sm:px-4 py-3 sm:py-4 text-slate-600 font-semibold text-[10px] sm:text-xs uppercase tracking-wider">Rating</th>
                     <th className="text-left px-3 sm:px-4 py-3 sm:py-4 text-slate-600 font-semibold text-[10px] sm:text-xs uppercase tracking-wider hidden xs:table-cell">Status</th>
                     <th className="text-right px-3 sm:px-4 py-3 sm:py-4 text-slate-600 font-semibold text-[10px] sm:text-xs uppercase tracking-wider">Actions</th>
@@ -364,18 +385,12 @@ export default function ReviewAdmin() {
                         </div>
                       </td>
                       <td className="px-3 sm:px-4 py-3 sm:py-4 text-slate-600 text-xs sm:text-sm hidden sm:table-cell">
-                        <span className="flex items-center gap-1 sm:gap-1.5">
-                          <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-400" />
-                          {review.area}
-                        </span>
-                      </td>
-                      <td className="px-3 sm:px-4 py-3 sm:py-4 text-slate-600 text-xs sm:text-sm hidden md:table-cell">
-                        <div className="max-w-[180px] sm:max-w-xs">
-                          {review.quote.length > 50 ? (
+                        <div className="max-w-xs">
+                          {review.quote.length > 60 ? (
                             <>
                               {expandedReview === review.id 
                                 ? review.quote 
-                                : `${review.quote.substring(0, 50)}...`}
+                                : `${review.quote.substring(0, 60)}...`}
                               <button
                                 onClick={() => setExpandedReview(expandedReview === review.id ? null : review.id)}
                                 className="text-emerald-600 hover:text-emerald-700 font-medium text-[10px] sm:text-xs ml-1"

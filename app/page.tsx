@@ -8,6 +8,7 @@ import {
   Camera, Sun, ShieldAlert, Loader2 
 } from 'lucide-react';
 import ReviewForm from '@/components/ReviewForm';
+import HeroSlider from '@/components/HeroSlider';
 
 interface Service {
   id: number;
@@ -83,89 +84,8 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white">
 
-      {/* ============ HERO ============ */}
-      <section
-        className="relative min-h-[100dvh] flex items-center bg-cover bg-center bg-no-repeat text-white overflow-hidden"
-        style={{ backgroundImage: "url('/images/hero.jpg')" }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-blue-950/80 via-blue-900/85 to-blue-700/90" />
-        <div className="absolute inset-0 bg-[radial-gradient(#ffffff15_1px,transparent_1px)] bg-[length:40px_40px]" />
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-24 pb-32 relative z-10 w-full">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-
-            <div className="space-y-6 sm:space-y-8">
-              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/30 rounded-full px-3 sm:px-4 py-1.5">
-                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                <span className="text-xs sm:text-sm font-medium tracking-wide">Now live in Thika</span>
-              </div>
-
-              <div>
-                <p className="text-blue-200 text-sm sm:text-lg tracking-widest font-medium">FAST · RELIABLE · EFFICIENT</p>
-                <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold leading-[1.05] mt-3 sm:mt-4">
-                  UltrafyFiberNet<br />
-                  <span className="text-yellow-400">Tuko Thika</span>
-                </h1>
-              </div>
-
-              <p className="text-base sm:text-xl text-blue-50 max-w-md leading-relaxed">
-                Premium fibre internet built for Thika homes and businesses. No buffering, no excuses — just fast, dependable connection your whole family can count on.
-              </p>
-
-              <div className="bg-yellow-400/20 backdrop-blur-md border border-yellow-400/30 rounded-2xl px-4 sm:px-6 py-3 sm:py-4 text-center">
-                <p className="text-yellow-200 font-bold text-sm sm:text-base">
-                  SPECIAL OFFER: Get 1 Month Free After Installation
-                </p>
-                <p className="text-blue-100 text-xs sm:text-sm mt-1">Limited time offer — available for all packages</p>
-              </div>
-
-              <div className="grid grid-cols-4 gap-2 sm:gap-4 pt-2 sm:pt-4">
-                {[
-                  { speed: "5", price: "1,000", accent: "from-emerald-500 to-emerald-400" },
-                  { speed: "8", price: "1,500", accent: "from-blue-500 to-cyan-400" },
-                  { speed: "15", price: "2,000", accent: "from-purple-500 to-violet-400" },
-                  { speed: "30", price: "3,000", accent: "from-orange-500 to-amber-400" },
-                ].map((pkg, i) => (
-                  <div
-                    key={i}
-                    className="bg-white/10 backdrop-blur-md border border-white/30 rounded-2xl sm:rounded-3xl p-2 sm:p-5 text-center hover:scale-105 hover:bg-white/15 transition-all duration-300"
-                  >
-                    <div className={`text-lg sm:text-4xl font-extrabold bg-gradient-to-br ${pkg.accent} bg-clip-text text-transparent`}>
-                      {pkg.speed}
-                    </div>
-                    <div className="text-[8px] sm:text-sm text-white/70 -mt-1">Mbps</div>
-                    <div className="mt-1 sm:mt-3 text-sm sm:text-2xl font-bold">KSh {pkg.price}</div>
-                    <div className="text-[7px] sm:text-xs text-white/60">per month</div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex flex-wrap gap-3 sm:gap-4 pt-2">
-                <a
-                  href="#contact"
-                  className="bg-emerald-500 text-white font-bold px-6 sm:px-10 py-3 sm:py-4 rounded-full text-sm sm:text-lg hover:bg-emerald-600 transition-all duration-300 shadow-lg shadow-emerald-500/20"
-                >
-                  Get Connected Now
-                </a>
-                <a
-                  href="tel:0700541561"
-                  className="border-2 border-white/80 hover:border-white font-semibold px-4 sm:px-8 py-3 sm:py-4 rounded-full text-sm sm:text-lg flex items-center gap-2 sm:gap-3 hover:bg-white/10 transition-all duration-300"
-                >
-                  <Phone className="w-4 h-4 sm:w-5 sm:h-5" />
-                  0700 541 561
-                </a>
-              </div>
-            </div>
-
-            <div className="hidden lg:block" />
-          </div>
-        </div>
-
-        <div className="absolute bottom-0 left-0 right-0 bg-blue-950/80 backdrop-blur-sm py-4 sm:py-6 text-center z-20 border-t border-white/10">
-          <p className="text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-widest">0700 541 561</p>
-          <p className="text-blue-200 text-xs sm:text-sm mt-1">Call or WhatsApp us anytime for instant support</p>
-        </div>
-      </section>
+      {/* ============ HERO SLIDER ============ */}
+      <HeroSlider />
 
       {/* ============ DYNAMIC SERVICES PREVIEW ============ */}
       <section className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-50">
@@ -187,7 +107,6 @@ export default function Home() {
             </div>
           ) : services.length === 0 ? (
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* Fallback services if none in database */}
               {[
                 { icon: Wifi, title: "Internet Installation", desc: "Fibre and wireless internet setup for homes and businesses." },
                 { icon: Camera, title: "CCTV Installation", desc: "HD surveillance systems with remote viewing access." },
@@ -317,7 +236,7 @@ export default function Home() {
       <section className="py-16 sm:py-24 px-4 sm:px-6 bg-slate-50">
         <div className="max-w-7xl mx-auto">
           <div className="max-w-2xl mb-12 sm:mb-16">
-            <p className="text-blue-600 font-semibold tracking-widest text-xs sm:text-sm">WHY ULTRAFYFIBERNET</p>
+            <p className="text-blue-600 font-semibold tracking-widest text-xs sm:text-sm">WHY ULTRAFYNETWORKS</p>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-blue-950 mt-2 sm:mt-3">
               Internet that actually works when you need it
             </h2>
@@ -401,7 +320,7 @@ export default function Home() {
       </section>
 
       {/* ============ DYNAMIC TESTIMONIALS ============ */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 bg-white">
+      <section id="testimonials" className="py-16 sm:py-24 px-4 sm:px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="max-w-2xl mb-12 sm:mb-16">
             <p className="text-blue-600 font-semibold tracking-widest text-xs sm:text-sm">WHAT OUR CUSTOMERS SAY</p>
@@ -450,7 +369,7 @@ export default function Home() {
               Tell Us About Your Experience
             </h2>
             <p className="text-slate-600 mt-4 max-w-xl mx-auto">
-              We value your feedback. Share your experience with UltrafyFiberNet and help others make informed decisions.
+              We value your feedback. Share your experience with UltrafyNetworks and help others make informed decisions.
             </p>
           </div>
           <ReviewForm />
@@ -492,7 +411,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-[radial-gradient(#ffffff15_1px,transparent_1px)] bg-[length:40px_40px]" />
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold mb-4 sm:mb-6">
-            Ready to get UltrafyFiberNet?
+            Ready to get UltrafyNetworks?
           </h2>
           <p className="text-emerald-50 text-base sm:text-lg max-w-xl mx-auto mb-8 sm:mb-10 leading-relaxed">
             Tell us where you are in Thika and we'll let you know if you're in our coverage zone — most homes hear back within the hour.

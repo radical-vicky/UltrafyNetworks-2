@@ -45,7 +45,7 @@ export default function Footer() {
               0700 541 561
             </a>
             <a
-              href="mailto:info@ultrafyfibernet.co.ke"
+              href="mailto:info@ultrafynetworks.co.ke"
               className="flex items-center gap-2 bg-white/10 border border-white/20 hover:bg-white/20 text-white font-medium px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl transition-colors text-sm sm:text-base"
             >
               <Mail className="w-4 h-4 text-emerald-400" />
@@ -64,7 +64,7 @@ export default function Footer() {
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 text-white font-bold text-[8px] leading-tight text-center">
                 UFN
               </div>
-              <span className="text-blue-950 font-extrabold text-lg sm:text-xl">UltrafyFiberNet</span>
+              <span className="text-blue-950 font-extrabold text-lg sm:text-xl">UltrafyNetworks</span>
             </div>
             <p className="text-slate-600 text-sm leading-relaxed max-w-xs">
               Premium fibre internet built for Thika homes and businesses. Fast, reliable, and unlimited connectivity.
@@ -123,7 +123,7 @@ export default function Footer() {
       <div className="border-t border-blue-900/40">
         <div className="max-w-6xl mx-auto px-6 py-5 sm:py-6 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 text-xs sm:text-sm">
           <p className="text-blue-100 text-center sm:text-left">
-            &copy; {new Date().getFullYear()} UltrafyFiberNet. All rights reserved.
+            &copy; {new Date().getFullYear()} UltrafyNetworks. All rights reserved.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
             <Link href="/privacy-policy" className="text-blue-100 hover:text-emerald-400 transition-colors">Privacy Policy</Link>
@@ -133,4 +133,4 @@ export default function Footer() {
       </div>
     </footer>
   );
-                }
+}

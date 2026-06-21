@@ -24,3 +24,108 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ============ HERO SLIDER ANIMATIONS ============ */
+
+/* Fade In Up Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s ease-out forwards;
+}
+
+/* Slide Container - prevents overflow during transitions */
+.slide-container {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Progress Bar Animation */
+@keyframes progress {
+  from {
+    width: 0%;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+/* Slide Transition - smooth fade */
+.slide-transition {
+  transition: opacity 1s ease-in-out;
+}
+
+/* Optional: Slide Scale Effect */
+@keyframes slideScale {
+  from {
+    transform: scale(1.05);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+.animate-slide-scale {
+  animation: slideScale 8s ease-out forwards;
+}
+
+/* Optional: Pulse for the live badge */
+@keyframes pulse-dot {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
+/* ============ RESPONSIVE ADJUSTMENTS ============ */
+
+/* Small screens */
+@media (max-width: 640px) {
+  .animate-fade-in-up {
+    animation-duration: 0.6s;
+  }
+}
+
+/* Touch device improvements */
+@media (hover: none) {
+  .slide-controls button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+/* ============ UTILITY CLASSES ============ */
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Selection color */
+::selection {
+  background: #10b981;
+  color: white;
+}
+
+/* Focus outline for accessibility */
+*:focus-visible {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+}

@@ -1,72 +1,77 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Database from 'better-sqlite3';
 import fs from 'fs';
+import path from 'path';
 
-function initializeDatabase() {
-  const dbPath = '/tmp/services.db';
-  let db: Database.Database;
-  
-  if (!fs.existsSync(dbPath)) {
-    db = new Database(dbPath);
-    
-    db.exec(`
-      CREATE TABLE IF NOT EXISTS services (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
-        description TEXT NOT NULL,
-        icon TEXT DEFAULT 'Wifi',
-        color TEXT DEFAULT 'bg-blue-500',
-        image TEXT DEFAULT '/images/services/placeholder.jpg',
-        category TEXT DEFAULT 'Connectivity',
-        features TEXT DEFAULT '[]',
-        status TEXT DEFAULT 'active',
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP
-      )
-    `);
-    
-    // Insert sample services
-    const insertStmt = db.prepare(`
-      INSERT INTO services (title, description, icon, color, image, category, features, status)
-      VALUES (?, ?, ?, ?, ?, ?, ?, 'active')
-    `);
-    
-    const sampleServices = [
-      ['Internet Installation', 'Professional fibre and wireless internet installation for homes and businesses.', 'Wifi', 'bg-blue-500', '/images/services/internet.jpg', 'Connectivity', JSON.stringify(['Fibre to the home', 'Wireless setup', 'Network configuration'])],
-      ['CCTV Installation', 'HD surveillance systems with remote viewing access for homes and businesses.', 'Camera', 'bg-slate-700', '/images/services/cctv.jpg', 'Security', JSON.stringify(['HD cameras', 'Remote viewing', 'Night vision'])],
-      ['Solar Panels', 'Solar energy solutions with battery backup options for homes and businesses.', 'Sun', 'bg-amber-500', '/images/services/solar.jpg', 'Energy', JSON.stringify(['Solar panel installation', 'Battery backup', 'System design'])],
-    ];
-    
-    const insertMany = db.transaction((services: any[][]) => {
-      for (const s of services) {
-        insertStmt.run(s);
-      }
-    });
-    
-    insertMany(sampleServices);
-    db.close();
-  }
-}
+// Use the database file in your project root
+const DB_PATH = path.join(process.cwd(), 'services.db');
 
 export async function GET() {
   try {
-    initializeDatabase();
-    const dbPath = '/tmp/services.db';
-    const db = new Database(dbPath);
+    // Check if database exists
+    if (!fs.existsSync(DB_PATH)) {
+      // Initialize with sample data
+      const db = new Database(DB_PATH);
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS services (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT NOT NULL,
+          description TEXT NOT NULL,
+          icon TEXT DEFAULT 'Wifi',
+          color TEXT DEFAULT 'bg-blue-500',
+          image TEXT DEFAULT '/images/services/placeholder.jpg',
+          category TEXT DEFAULT 'Connectivity',
+          features TEXT DEFAULT '[]',
+          status TEXT DEFAULT 'active',
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+      
+      const insertStmt = db.prepare(`
+        INSERT INTO services (title, description, icon, color, image, category, features, status)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'active')
+      `);
+      
+      const sampleServices = [
+        ['Internet Installation', 'Professional fibre and wireless internet installation for homes and businesses.', 'Wifi', 'bg-blue-500', '/images/services/internet.jpg', 'Connectivity', JSON.stringify(['Fibre to the home', 'Wireless setup', 'Network configuration'])],
+        ['CCTV Installation', 'HD surveillance systems with remote viewing access for homes and businesses.', 'Camera', 'bg-slate-700', '/images/services/cctv.jpg', 'Security', JSON.stringify(['HD cameras', 'Remote viewing', 'Night vision'])],
+        ['Solar Panels', 'Solar energy solutions with battery backup options for homes and businesses.', 'Sun', 'bg-amber-500', '/images/services/solar.jpg', 'Energy', JSON.stringify(['Solar panel installation', 'Battery backup', 'System design'])],
+      ];
+      
+      const insertMany = db.transaction((services: any[][]) => {
+        for (const s of services) {
+          insertStmt.run(s);
+        }
+      });
+      
+      insertMany(sampleServices);
+      db.close();
+      console.log('Database created with sample services!');
+    }
+    
+    const db = new Database(DB_PATH);
     const stmt = db.prepare('SELECT * FROM services ORDER BY created_at DESC');
     const result = stmt.all();
     db.close();
     
+    // Parse features JSON for each service
+    const parsedData = result.map((r: any) => ({
+      ...r,
+      features: JSON.parse(r.features || '[]')
+    }));
+    
     return NextResponse.json({
       success: true,
-      data: result.map((r: any) => ({
-        ...r,
-        features: JSON.parse(r.features || '[]')
-      })),
+      data: parsedData,
       total: result.length,
     });
   } catch (error) {
+    console.error('Error fetching services:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch services' },
+      { 
+        success: false, 
+        error: 'Failed to fetch services: ' + (error as Error).message,
+      },
       { status: 500 }
     );
   }
@@ -74,7 +79,6 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    initializeDatabase();
     const body = await request.json();
     const { title, description, category, features, image, color } = body;
     
@@ -85,8 +89,27 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const dbPath = '/tmp/services.db';
-    const db = new Database(dbPath);
+    // Ensure database exists
+    if (!fs.existsSync(DB_PATH)) {
+      const db = new Database(DB_PATH);
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS services (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT NOT NULL,
+          description TEXT NOT NULL,
+          icon TEXT DEFAULT 'Wifi',
+          color TEXT DEFAULT 'bg-blue-500',
+          image TEXT DEFAULT '/images/services/placeholder.jpg',
+          category TEXT DEFAULT 'Connectivity',
+          features TEXT DEFAULT '[]',
+          status TEXT DEFAULT 'active',
+          created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+      `);
+      db.close();
+    }
+    
+    const db = new Database(DB_PATH);
     const stmt = db.prepare(`
       INSERT INTO services (title, description, icon, color, image, category, features, status)
       VALUES (?, ?, ?, ?, ?, ?, ?, 'active')
@@ -106,13 +129,6 @@ export async function POST(request: NextRequest) {
     const newService = getStmt.get(info.lastInsertRowid) as any;
     db.close();
     
-    if (!newService) {
-      return NextResponse.json(
-        { success: false, error: 'Failed to retrieve created service' },
-        { status: 500 }
-      );
-    }
-    
     return NextResponse.json({
       success: true,
       data: {
@@ -124,7 +140,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error adding service:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to add service' },
+      { success: false, error: 'Failed to add service: ' + (error as Error).message },
       { status: 500 }
     );
   }
@@ -144,8 +160,7 @@ export async function PUT(request: NextRequest) {
     const body = await request.json();
     const { title, description, category, features, image, color, status } = body;
     
-    const dbPath = '/tmp/services.db';
-    const db = new Database(dbPath);
+    const db = new Database(DB_PATH);
     const stmt = db.prepare(`
       UPDATE services 
       SET title = ?, description = ?, icon = ?, color = ?, image = ?, category = ?, features = ?, status = ?
@@ -196,8 +211,7 @@ export async function DELETE(request: NextRequest) {
       );
     }
     
-    const dbPath = '/tmp/services.db';
-    const db = new Database(dbPath);
+    const db = new Database(DB_PATH);
     const stmt = db.prepare('DELETE FROM services WHERE id = ?');
     const result = stmt.run(parseInt(id));
     db.close();

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Menu, X, ArrowRight, Wifi, Phone } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
 
 const navLinks = [
   {
@@ -11,27 +12,30 @@ const navLinks = [
   },
   {
     label: "Packages",
-    href: "#packages",
+    href: "/#packages",
   },
   {
     label: "Coverage",
-    href: "#coverage",
+    href: "/#coverage",
   },
   {
     label: "Careers",
     href: "/careers",
   },
   {
-    label: "Reviews",
-    href: "/admin/reviews",
+    label: "Testimonials",
+    href: "/#testimonials",
+  },
+  {
+    label: "Invest",
+    href: "/invest",
   },
   {
     label: "Contact",
-    href: "#contact",
+    href: "/#contact",
   },
 ];
 
-// Updated packages to match your offerings
 export const packages = [
   { 
     speed: "5", 
@@ -72,8 +76,12 @@ export const packages = [
 ];
 
 export default function Navbar() {
+  const pathname = usePathname();
+  const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const isAdminPage = pathname?.startsWith('/admin');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -100,19 +108,35 @@ export default function Navbar() {
     };
   }, [mobileOpen]);
 
-  // Handle smooth scroll for anchor links
-  const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    if (href.startsWith("#")) {
-      e.preventDefault();
-      const targetId = href.replace("#", "");
+  if (isAdminPage) {
+    return null;
+  }
+
+  const handleNavigation = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    
+    if (href.startsWith('/#')) {
+      const targetId = href.replace('/#', '');
       const element = document.getElementById(targetId);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" });
-        setMobileOpen(false);
+      
+      if (pathname === '/') {
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        }
+      } else {
+        router.push('/');
+        setTimeout(() => {
+          const el = document.getElementById(targetId);
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth" });
+          }
+        }, 300);
       }
     } else {
-      setMobileOpen(false);
+      router.push(href);
     }
+    
+    setMobileOpen(false);
   };
 
   return (
@@ -121,7 +145,7 @@ export default function Navbar() {
         className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
           isScrolled
             ? "bg-white/95 backdrop-blur-xl shadow-lg border-b border-gray-200"
-            : "bg-gradient-to-b from-blue-950/90 to-transparent"
+            : "bg-transparent"
         }`}
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -131,7 +155,7 @@ export default function Navbar() {
               href="/"
               className="flex items-center gap-2 sm:gap-3 group flex-shrink-0"
             >
-              <div className="flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 text-white font-bold shadow-lg transition-transform duration-300 group-hover:scale-105 text-[8px] sm:text-[10px] leading-tight text-center">
+              <div className="flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white font-bold shadow-lg transition-transform duration-300 group-hover:scale-105 text-[8px] sm:text-[10px] leading-tight text-center">
                 UFN
               </div>
 
@@ -143,7 +167,7 @@ export default function Navbar() {
                       : "text-white"
                   }`}
                 >
-                  UltrafyFiberNet
+                  UltrafyNetworks
                 </h1>
 
                 <p
@@ -164,11 +188,11 @@ export default function Navbar() {
                 <a
                   key={link.href}
                   href={link.href}
-                  onClick={(e) => handleSmoothScroll(e, link.href)}
+                  onClick={(e) => handleNavigation(e, link.href)}
                   className={`font-medium transition-colors duration-300 ${
                     isScrolled
                       ? "text-gray-700 hover:text-emerald-600"
-                      : "text-white hover:text-yellow-300"
+                      : "text-white/80 hover:text-white"
                   }`}
                 >
                   {link.label}
@@ -183,16 +207,16 @@ export default function Navbar() {
                 className={`inline-flex items-center gap-2 rounded-xl px-3 lg:px-5 py-2 lg:py-3 text-xs lg:text-sm font-semibold transition-all duration-300 ${
                   isScrolled
                     ? "text-emerald-600 hover:bg-emerald-50"
-                    : "text-white hover:bg-white/10"
+                    : "text-white/80 hover:text-white hover:bg-white/10"
                 }`}
               >
                 <Phone className="w-3 h-3 lg:w-4 lg:h-4" />
                 0700 541 561
               </a>
               <a
-                href="#contact"
-                onClick={(e) => handleSmoothScroll(e, "#contact")}
-                className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 lg:px-5 py-2 lg:py-3 text-xs lg:text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:bg-emerald-600 hover:shadow-xl hover:-translate-y-0.5"
+                href="/#contact"
+                onClick={(e) => handleNavigation(e, "/#contact")}
+                className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 px-4 lg:px-5 py-2 lg:py-3 text-xs lg:text-sm font-semibold text-white shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5"
               >
                 Get Connected
                 <ArrowRight className="h-3 w-3 lg:h-4 lg:w-4" />
@@ -245,13 +269,13 @@ export default function Navbar() {
               onClick={() => setMobileOpen(false)}
               className="flex items-center gap-2 sm:gap-3"
             >
-              <div className="flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 text-white font-bold text-[8px] sm:text-[10px] leading-tight text-center">
+              <div className="flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 text-white font-bold text-[8px] sm:text-[10px] leading-tight text-center">
                 UFN
               </div>
 
               <div>
                 <h2 className="font-bold text-sm sm:text-base text-gray-900">
-                  UltrafyFiberNet
+                  UltrafyNetworks
                 </h2>
 
                 <p className="text-[10px] sm:text-xs text-gray-500">
@@ -276,7 +300,7 @@ export default function Navbar() {
               <a
                 key={link.href}
                 href={link.href}
-                onClick={(e) => handleSmoothScroll(e, link.href)}
+                onClick={(e) => handleNavigation(e, link.href)}
                 className="rounded-xl px-4 py-3.5 sm:py-4 text-base sm:text-lg font-medium text-gray-700 transition hover:bg-gray-100 hover:text-emerald-600"
               >
                 {link.label}
@@ -284,32 +308,32 @@ export default function Navbar() {
             ))}
 
             {/* Packages Display in Mobile */}
-            <div className="mt-4 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 p-3 sm:p-4">
-              <h3 className="text-xs sm:text-sm font-semibold text-blue-900 mb-2 sm:mb-3">
+            <div className="mt-4 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100 p-3 sm:p-4">
+              <h3 className="text-xs sm:text-sm font-semibold text-emerald-900 mb-2 sm:mb-3">
                 Our Packages
               </h3>
               {packages.map((pkg, i) => (
-                <div key={i} className="flex items-center justify-between py-1.5 sm:py-2 border-b border-blue-200/50 last:border-0">
+                <div key={i} className="flex items-center justify-between py-1.5 sm:py-2 border-b border-emerald-200/50 last:border-0">
                   <div className="flex items-center gap-2">
-                    <Wifi className="h-3 w-3 sm:h-4 sm:w-4 text-blue-600" />
+                    <Wifi className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-600" />
                     <span className="font-medium text-sm sm:text-base text-gray-900">{pkg.speed} Mbps</span>
                   </div>
                   <div className="flex items-center gap-1 sm:gap-2">
-                    <span className="font-bold text-blue-600 text-sm sm:text-base">KSh {pkg.price}</span>
+                    <span className="font-bold text-emerald-600 text-sm sm:text-base">KSh {pkg.price}</span>
                     <span className="text-[10px] sm:text-xs text-gray-500 line-through">KSh {pkg.originalPrice}</span>
                   </div>
                 </div>
               ))}
-              <p className="text-[10px] sm:text-xs text-blue-700 mt-1 sm:mt-2">
+              <p className="text-[10px] sm:text-xs text-emerald-700 mt-1 sm:mt-2">
                 * 1 Month Free After Installation
               </p>
             </div>
 
             {/* Mobile CTA */}
             <a
-              href="#contact"
-              onClick={(e) => handleSmoothScroll(e, "#contact")}
-              className="mt-4 sm:mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 py-3.5 sm:py-4 font-semibold text-white shadow-lg transition hover:bg-emerald-600 hover:shadow-xl text-sm sm:text-base"
+              href="/#contact"
+              onClick={(e) => handleNavigation(e, "/#contact")}
+              className="mt-4 sm:mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 px-5 py-3.5 sm:py-4 font-semibold text-white shadow-lg transition hover:shadow-xl text-sm sm:text-base"
             >
               Get Connected
               <ArrowRight className="h-4 w-4" />

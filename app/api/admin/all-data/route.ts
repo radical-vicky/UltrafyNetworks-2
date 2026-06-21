@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Database from 'better-sqlite3';
 import fs from 'fs';
+import path from 'path';
 
 interface Service {
   id: number;
@@ -37,36 +38,57 @@ interface Review {
   created_at: string;
 }
 
-function getDb(dbPath: string): Database.Database | null {
+function getDb(dbName: string): Database.Database | null {
+  const dbPath = path.join(process.cwd(), dbName);
   if (!fs.existsSync(dbPath)) {
+    console.log(`Database not found: ${dbPath}`);
     return null;
   }
+  console.log(`Found database: ${dbPath}`);
   return new Database(dbPath);
 }
 
 export async function GET() {
   try {
+    const projectRoot = process.cwd();
+    console.log('Project root:', projectRoot);
+    
     // Fetch all data from different databases
-    const servicesDb = getDb('/tmp/services.db');
-    const careersDb = getDb('/tmp/careers.db');
-    const testimonialsDb = getDb('/tmp/testimonials.db');
+    const servicesDb = getDb('services.db');
+    const careersDb = getDb('careers.db');
+    const testimonialsDb = getDb('testimonials.db');
 
     let services: Service[] = [];
     let careers: Career[] = [];
     let reviews: Review[] = [];
 
     if (servicesDb) {
-      services = servicesDb.prepare('SELECT * FROM services ORDER BY created_at DESC').all() as Service[];
+      try {
+        services = servicesDb.prepare('SELECT * FROM services ORDER BY created_at DESC').all() as Service[];
+        console.log(`Found ${services.length} services`);
+      } catch (e) {
+        console.error('Error reading services:', e);
+      }
       servicesDb.close();
     }
 
     if (careersDb) {
-      careers = careersDb.prepare('SELECT * FROM roles ORDER BY posted_date DESC').all() as Career[];
+      try {
+        careers = careersDb.prepare('SELECT * FROM roles ORDER BY posted_date DESC').all() as Career[];
+        console.log(`Found ${careers.length} careers`);
+      } catch (e) {
+        console.error('Error reading careers:', e);
+      }
       careersDb.close();
     }
 
     if (testimonialsDb) {
-      reviews = testimonialsDb.prepare('SELECT * FROM testimonials ORDER BY created_at DESC').all() as Review[];
+      try {
+        reviews = testimonialsDb.prepare('SELECT * FROM testimonials ORDER BY created_at DESC').all() as Review[];
+        console.log(`Found ${reviews.length} reviews`);
+      } catch (e) {
+        console.error('Error reading reviews:', e);
+      }
       testimonialsDb.close();
     }
 
@@ -88,7 +110,11 @@ export async function GET() {
   } catch (error) {
     console.error('Error fetching all data:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to fetch data' },
+      { 
+        success: false, 
+        error: 'Failed to fetch data: ' + (error as Error).message,
+        stack: (error as Error).stack,
+      },
       { status: 500 }
     );
   }

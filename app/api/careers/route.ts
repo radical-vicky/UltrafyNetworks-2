@@ -1,69 +1,71 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Database from 'better-sqlite3';
 import fs from 'fs';
+import path from 'path';
 
-function initializeDatabase() {
-  const dbPath = '/tmp/careers.db';
-  let db: Database.Database;
-  
-  if (!fs.existsSync(dbPath)) {
-    db = new Database(dbPath);
-    
-    db.exec(`
-      CREATE TABLE IF NOT EXISTS roles (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title TEXT NOT NULL,
-        department TEXT NOT NULL,
-        location TEXT NOT NULL,
-        type TEXT NOT NULL,
-        icon TEXT DEFAULT 'Wrench',
-        desc TEXT NOT NULL,
-        status TEXT DEFAULT 'open',
-        posted_date TEXT DEFAULT CURRENT_DATE
-      )
-    `);
-    
-    const insertStmt = db.prepare(`
-      INSERT INTO roles (title, department, location, type, icon, desc, status, posted_date) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-    
-    const sampleRoles = [
-      ['Field Technician', 'Network Operations', 'Thika', 'Full-time', 'Wrench', 'Install and maintain fibre connections for homes and businesses, troubleshoot on-site issues, and keep our network running reliably across Thika.', 'open', '2026-06-01'],
-      ['Customer Support Agent', 'Customer Experience', 'Thika', 'Full-time', 'Headset', 'Be the first voice customers hear — handle billing questions, technical support calls, and walk-in inquiries with patience and clarity.', 'open', '2026-06-10'],
-      ['Sales Representative', 'Sales & Marketing', 'Thika', 'Full-time', 'TrendingUp', 'Help grow our customer base across Thika. Engage with potential clients, explain our packages, and drive adoption of fibre internet in new areas.', 'open', '2026-06-15']
-    ];
-    
-    const insertMany = db.transaction((roles: any[][]) => {
-      for (const role of roles) {
-        insertStmt.run(role);
-      }
-    });
-    
-    insertMany(sampleRoles);
-    db.close();
-  }
-}
+const DB_PATH = path.join(process.cwd(), 'careers.db');
 
-// GET: Fetch all open roles
+// GET: Fetch all roles
 export async function GET(request: NextRequest) {
   try {
-    initializeDatabase();
+    // Check if database exists
+    if (!fs.existsSync(DB_PATH)) {
+      // Create database with sample data
+      const db = new Database(DB_PATH);
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS roles (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT NOT NULL,
+          department TEXT NOT NULL,
+          location TEXT NOT NULL,
+          type TEXT NOT NULL,
+          icon TEXT DEFAULT 'Wrench',
+          desc TEXT NOT NULL,
+          status TEXT DEFAULT 'open',
+          posted_date TEXT DEFAULT CURRENT_DATE
+        )
+      `);
+      
+      const insertStmt = db.prepare(`
+        INSERT INTO roles (title, department, location, type, icon, desc, status, posted_date) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      
+      const sampleRoles = [
+        ['Field Technician', 'Network Operations', 'Thika', 'Full-time', 'Wrench', 'Install and maintain fibre connections for homes and businesses.', 'open', '2026-06-01'],
+        ['Customer Support Agent', 'Customer Experience', 'Thika', 'Full-time', 'Headset', 'Be the first voice customers hear — handle billing questions.', 'open', '2026-06-10'],
+        ['Sales Representative', 'Sales & Marketing', 'Thika', 'Full-time', 'TrendingUp', 'Help grow our customer base across Thika.', 'open', '2026-06-15']
+      ];
+      
+      const insertMany = db.transaction((roles: any[][]) => {
+        for (const role of roles) {
+          insertStmt.run(role);
+        }
+      });
+      
+      insertMany(sampleRoles);
+      db.close();
+    }
     
     const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status') || 'open';
+    const status = searchParams.get('status') || 'all';
     
-    const dbPath = '/tmp/careers.db';
-    const db = new Database(dbPath);
-    const stmt = db.prepare('SELECT * FROM roles WHERE status = ? ORDER BY posted_date DESC');
-    const result = stmt.all(status);
+    const db = new Database(DB_PATH);
+    let stmt;
+    if (status === 'all') {
+      stmt = db.prepare('SELECT * FROM roles ORDER BY posted_date DESC');
+    } else {
+      stmt = db.prepare('SELECT * FROM roles WHERE status = ? ORDER BY posted_date DESC');
+    }
+    
+    const result = status === 'all' ? stmt.all() : stmt.all(status);
     db.close();
     
     return NextResponse.json({
       success: true,
       data: result,
       total: result.length,
-    }, { status: 200 });
+    });
     
   } catch (error) {
     console.error('Database error:', error);
@@ -74,11 +76,9 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST: Create a new job opening
+// POST: Create a new job
 export async function POST(request: NextRequest) {
   try {
-    initializeDatabase();
-    
     const body = await request.json();
     const { title, department, location, type, icon, desc } = body;
     
@@ -89,8 +89,26 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    const dbPath = '/tmp/careers.db';
-    const db = new Database(dbPath);
+    // Ensure database exists
+    if (!fs.existsSync(DB_PATH)) {
+      const db = new Database(DB_PATH);
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS roles (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT NOT NULL,
+          department TEXT NOT NULL,
+          location TEXT NOT NULL,
+          type TEXT NOT NULL,
+          icon TEXT DEFAULT 'Wrench',
+          desc TEXT NOT NULL,
+          status TEXT DEFAULT 'open',
+          posted_date TEXT DEFAULT CURRENT_DATE
+        )
+      `);
+      db.close();
+    }
+    
+    const db = new Database(DB_PATH);
     const stmt = db.prepare(`
       INSERT INTO roles (title, department, location, type, icon, desc, status, posted_date)
       VALUES (?, ?, ?, ?, ?, ?, 'open', date('now'))
@@ -105,35 +123,32 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: newRole,
-      message: 'Job opening created successfully',
-    }, { status: 201 });
+      message: 'Job created successfully',
+    });
     
   } catch (error) {
     console.error('Database error:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to create job opening' },
+      { success: false, error: 'Failed to create job' },
       { status: 500 }
     );
   }
 }
 
-// PUT: Update an existing job opening
+// PUT: Update a job
 export async function PUT(request: NextRequest) {
   try {
-    initializeDatabase();
-    
     const body = await request.json();
     const { id, title, department, location, type, icon, desc, status } = body;
     
     if (!id) {
       return NextResponse.json(
-        { success: false, error: 'Role ID is required' },
+        { success: false, error: 'Job ID is required' },
         { status: 400 }
       );
     }
     
-    const dbPath = '/tmp/careers.db';
-    const db = new Database(dbPath);
+    const db = new Database(DB_PATH);
     
     const updates: string[] = [];
     const values: any[] = [];
@@ -163,7 +178,7 @@ export async function PUT(request: NextRequest) {
     
     if (!result) {
       return NextResponse.json(
-        { success: false, error: 'Role not found' },
+        { success: false, error: 'Job not found' },
         { status: 404 }
       );
     }
@@ -171,55 +186,52 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: result,
-      message: 'Job opening updated successfully',
-    }, { status: 200 });
+      message: 'Job updated successfully',
+    });
     
   } catch (error) {
     console.error('Database error:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to update job opening' },
+      { success: false, error: 'Failed to update job' },
       { status: 500 }
     );
   }
 }
 
-// DELETE: Remove a job opening
+// DELETE: Remove a job
 export async function DELETE(request: NextRequest) {
   try {
-    initializeDatabase();
-    
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
     
     if (!id) {
       return NextResponse.json(
-        { success: false, error: 'Role ID is required' },
+        { success: false, error: 'Job ID is required' },
         { status: 400 }
       );
     }
     
-    const dbPath = '/tmp/careers.db';
-    const db = new Database(dbPath);
+    const db = new Database(DB_PATH);
     const stmt = db.prepare('DELETE FROM roles WHERE id = ?');
     const result = stmt.run(parseInt(id));
     db.close();
     
     if (result.changes === 0) {
       return NextResponse.json(
-        { success: false, error: 'Role not found' },
+        { success: false, error: 'Job not found' },
         { status: 404 }
       );
     }
     
     return NextResponse.json({
       success: true,
-      message: 'Job opening deleted successfully',
-    }, { status: 200 });
+      message: 'Job deleted successfully',
+    });
     
   } catch (error) {
     console.error('Database error:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to delete job opening' },
+      { success: false, error: 'Failed to delete job' },
       { status: 500 }
     );
   }

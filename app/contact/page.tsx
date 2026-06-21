@@ -16,6 +16,8 @@ const subjects = [
   "Electric fence installation",
   "Fire alarm system",
   "Burglar alarm system",
+  "Investment opportunities",
+  "Partnership inquiry",
   "Other",
 ];
 
@@ -76,10 +78,10 @@ export default function ContactPage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-20 relative z-10">
           <p className="text-yellow-400 font-semibold tracking-widest text-xs sm:text-sm">GET IN TOUCH</p>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mt-2 sm:mt-3 max-w-xl leading-tight">
-            Talk to UltrafyFiberNet
+            Talk to UltrafyNetworks
           </h1>
           <p className="text-blue-100 text-sm sm:text-base mt-3 sm:mt-4 max-w-lg leading-relaxed">
-            Whether it's a new installation, a billing question, or something urgent — our team in Thika is ready to help.
+            Whether it's a new installation, investment opportunity, or something urgent — our team in Thika is ready to help.
           </p>
 
           <div className="flex flex-wrap gap-2 sm:gap-3 mt-4 sm:mt-7">
@@ -129,8 +131,8 @@ export default function ContactPage() {
               </div>
               <p className="font-bold text-blue-950 text-base sm:text-lg mb-1">Email us</p>
               <p className="text-slate-500 text-xs sm:text-sm mb-3 sm:mb-4">For detailed inquiries and documentation</p>
-              <a href="mailto:info@ultrafyfibernet.co.ke" className="text-emerald-600 font-semibold hover:text-emerald-800 transition-colors break-all text-sm sm:text-base">
-                info@ultrafyfibernet.co.ke
+              <a href="mailto:info@ultrafynetworks.co.ke" className="text-emerald-600 font-semibold hover:text-emerald-800 transition-colors break-all text-sm sm:text-base">
+                info@ultrafynetworks.co.ke
               </a>
             </div>
 
@@ -220,4 +222,4 @@ export default function ContactPage() {
       </div>
     </div>
   );
-      }
+}
