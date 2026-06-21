@@ -269,8 +269,8 @@ export async function PUT(request: NextRequest) {
     
     const db = new Database(DB_PATH);
     
-    // Get existing slide with proper typing
-    const getStmt = db.prepare<{ id: number }>('SELECT * FROM slides WHERE id = ?');
+    // Get existing slide - use get with number directly
+    const getStmt = db.prepare('SELECT * FROM slides WHERE id = ?');
     const existingSlide = getStmt.get(parseInt(id)) as Slide | undefined;
     
     if (!existingSlide) {
@@ -352,8 +352,8 @@ export async function DELETE(request: NextRequest) {
     
     const db = new Database(DB_PATH);
     
-    // Get slide to delete image with proper typing
-    const getStmt = db.prepare<{ id: number }>('SELECT * FROM slides WHERE id = ?');
+    // Get slide to delete image
+    const getStmt = db.prepare('SELECT * FROM slides WHERE id = ?');
     const slide = getStmt.get(parseInt(id)) as Slide | undefined;
     
     if (slide) {
