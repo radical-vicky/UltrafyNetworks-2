@@ -12,6 +12,21 @@ if (!fs.existsSync(UPLOAD_DIR)) {
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 }
 
+interface Slide {
+  id: number;
+  title: string;
+  subtitle: string;
+  description: string;
+  image: string;
+  cta_text: string;
+  cta_link: string;
+  badge: string;
+  display_order: number;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
 function initializeDatabase() {
   try {
     const dbExists = fs.existsSync(DB_PATH);
@@ -254,9 +269,9 @@ export async function PUT(request: NextRequest) {
     
     const db = new Database(DB_PATH);
     
-    // Get existing slide
-    const getStmt = db.prepare('SELECT * FROM slides WHERE id = ?');
-    const existingSlide = getStmt.get(parseInt(id));
+    // Get existing slide with proper typing
+    const getStmt = db.prepare<{ id: number }>('SELECT * FROM slides WHERE id = ?');
+    const existingSlide = getStmt.get(parseInt(id)) as Slide | undefined;
     
     if (!existingSlide) {
       db.close();
@@ -295,7 +310,7 @@ export async function PUT(request: NextRequest) {
       cta_text || existingSlide.cta_text,
       cta_link || existingSlide.cta_link,
       badge || existingSlide.badge,
-      display_order,
+      display_order || existingSlide.display_order,
       status || existingSlide.status,
       parseInt(id)
     );
@@ -337,13 +352,13 @@ export async function DELETE(request: NextRequest) {
     
     const db = new Database(DB_PATH);
     
-    // Get slide to delete image
-    const getStmt = db.prepare('SELECT * FROM slides WHERE id = ?');
-    const slide = getStmt.get(parseInt(id));
+    // Get slide to delete image with proper typing
+    const getStmt = db.prepare<{ id: number }>('SELECT * FROM slides WHERE id = ?');
+    const slide = getStmt.get(parseInt(id)) as Slide | undefined;
     
     if (slide) {
       // Delete image file if it exists
-      const imagePath = (slide as any).image;
+      const imagePath = slide.image;
       if (imagePath && !imagePath.includes('slide1.jpg') && !imagePath.includes('slide2.jpg') && 
           !imagePath.includes('slide3.jpg') && !imagePath.includes('slide4.jpg')) {
         const fullPath = path.join(process.cwd(), 'public', imagePath);
