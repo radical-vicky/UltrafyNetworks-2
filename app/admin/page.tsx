@@ -893,6 +893,7 @@ function SlideModal({ isOpen, onClose, onSave, slide, isEditing }: { isOpen: boo
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>('');
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -908,6 +909,7 @@ function SlideModal({ isOpen, onClose, onSave, slide, isEditing }: { isOpen: boo
         status: slide.status || 'active',
       });
       setImagePreview(slide.image || '');
+      setImageFile(null);
     } else {
       setFormData({
         title: '',
@@ -922,6 +924,7 @@ function SlideModal({ isOpen, onClose, onSave, slide, isEditing }: { isOpen: boo
       setImagePreview('');
       setImageFile(null);
     }
+    setError('');
   }, [slide]);
 
   if (!isOpen) return null;
@@ -930,7 +933,21 @@ function SlideModal({ isOpen, onClose, onSave, slide, isEditing }: { isOpen: boo
     const file = e.target.files?.[0];
     if (!file) return;
     
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+    if (!validTypes.includes(file.type)) {
+      alert('Please select a valid image (JPEG, PNG, or WebP)');
+      return;
+    }
+    
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size must be less than 5MB');
+      return;
+    }
+    
     setImageFile(file);
+    setError('');
     const reader = new FileReader();
     reader.onloadend = () => {
       setImagePreview(reader.result as string);
@@ -941,29 +958,31 @@ function SlideModal({ isOpen, onClose, onSave, slide, isEditing }: { isOpen: boo
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    setError('');
+    
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append('title', formData.title);
-      formDataToSend.append('subtitle', formData.subtitle);
-      formDataToSend.append('description', formData.description);
-      formDataToSend.append('cta_text', formData.cta_text);
-      formDataToSend.append('cta_link', formData.cta_link);
-      formDataToSend.append('badge', formData.badge);
+      formDataToSend.append('title', formData.title.trim());
+      formDataToSend.append('subtitle', formData.subtitle.trim());
+      formDataToSend.append('description', formData.description.trim());
+      formDataToSend.append('cta_text', formData.cta_text.trim());
+      formDataToSend.append('cta_link', formData.cta_link.trim());
+      formDataToSend.append('badge', formData.badge.trim());
       formDataToSend.append('display_order', String(formData.display_order));
       formDataToSend.append('status', formData.status);
       
       if (imageFile) {
         formDataToSend.append('image', imageFile);
       } else if (!isEditing) {
-        alert('Please select an image');
+        setError('Please select an image');
         setSaving(false);
         return;
       }
       
       await onSave(formDataToSend);
       onClose();
-    } catch (error) {
-      alert('Failed to save slide. Please try again.');
+    } catch (err) {
+      setError((err as Error).message || 'Failed to save slide. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -998,7 +1017,9 @@ function SlideModal({ isOpen, onClose, onSave, slide, isEditing }: { isOpen: boo
               Slide Image <span className="text-red-500">*</span>
             </label>
             <div 
-              className="relative border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center hover:border-emerald-500 hover:bg-emerald-50/50 transition-all duration-200 cursor-pointer"
+              className={`relative border-2 border-dashed rounded-2xl p-6 text-center transition-all duration-200 cursor-pointer ${
+                error && !imagePreview ? 'border-red-500 bg-red-50/50' : 'border-slate-300 hover:border-emerald-500 hover:bg-emerald-50/50'
+              }`}
               onClick={() => fileInputRef.current?.click()}
             >
               <input
@@ -1021,14 +1042,14 @@ function SlideModal({ isOpen, onClose, onSave, slide, isEditing }: { isOpen: boo
                 </div>
               ) : (
                 <div className="py-8">
-                  <Upload className="w-12 h-12 text-slate-400 mx-auto mb-3" />
+                  <Upload className="w-12 h-12 mx-auto mb-3" />
                   <p className="text-slate-600 font-medium">Click to upload an image</p>
                   <p className="text-slate-400 text-sm mt-1">PNG, JPG, or WebP (Max 5MB)</p>
                 </div>
               )}
             </div>
-            {!isEditing && !imagePreview && (
-              <p className="text-xs text-red-500 mt-1">Image is required</p>
+            {error && !imagePreview && (
+              <p className="text-xs text-red-500 mt-1">{error}</p>
             )}
           </div>
 
@@ -1137,7 +1158,11 @@ function SlideModal({ isOpen, onClose, onSave, slide, isEditing }: { isOpen: boo
               Cancel
             </button>
             <button type="submit" disabled={saving} className="flex-1 bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3.5 rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25">
-              {saving ? <><Loader2 className="w-5 h-5 animate-spin" /> Saving...</> : <><Save className="w-5 h-5" /> {isEditing ? 'Update' : 'Add'} Slide</>}
+              {saving ? (
+                <><Loader2 className="w-5 h-5 animate-spin" /> Saving...</>
+              ) : (
+                <><Save className="w-5 h-5" /> {isEditing ? 'Update' : 'Add'} Slide</>
+              )}
             </button>
           </div>
         </form>
@@ -1288,7 +1313,7 @@ export default function AdminDashboard() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    const adminPassword = 'HUltrafy.Globals'
+    const adminPassword = 'admin123';
     if (password === adminPassword) {
       setIsAuthorized(true);
       sessionStorage.setItem('adminAuth', 'true');
@@ -1546,25 +1571,29 @@ export default function AdminDashboard() {
       if (response.ok) {
         await fetchAllData();
         alert('Message deleted successfully!');
+      } else {
+        alert('Failed to delete message');
       }
     } catch (error) {
       alert('Error deleting message');
     }
   };
 
-  // Slide CRUD with FormData - Fixed (no Content-Type header)
+  // Slide CRUD with FormData
   const handleAddSlide = async (formData: FormData) => {
     try {
       const response = await fetch('/api/slider', {
         method: 'POST',
-        body: formData, // Don't set Content-Type header!
+        body: formData,
       });
+      
+      const data = await response.json();
+      
       if (response.ok) {
         await fetchAllData();
         alert('Slide added successfully!');
       } else {
-        const error = await response.json();
-        alert(error.error || 'Failed to add slide');
+        alert(data.error || 'Failed to add slide');
       }
     } catch (error) {
       alert('Error adding slide');
@@ -1575,14 +1604,16 @@ export default function AdminDashboard() {
     try {
       const response = await fetch(`/api/slider?id=${editingSlide?.id}`, {
         method: 'PUT',
-        body: formData, // Don't set Content-Type header!
+        body: formData,
       });
+      
+      const data = await response.json();
+      
       if (response.ok) {
         await fetchAllData();
         alert('Slide updated successfully!');
       } else {
-        const error = await response.json();
-        alert(error.error || 'Failed to update slide');
+        alert(data.error || 'Failed to update slide');
       }
     } catch (error) {
       alert('Error updating slide');
