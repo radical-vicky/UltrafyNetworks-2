@@ -114,7 +114,6 @@ function initializeDatabase() {
 // GET: Fetch all investment opportunities
 export async function GET(request: NextRequest) {
   try {
-    // Initialize database if it doesn't exist
     initializeDatabase();
     
     const { searchParams } = new URL(request.url);
@@ -122,7 +121,6 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category');
     const status = searchParams.get('status') || 'active';
     
-    // Check if database file exists
     if (!fs.existsSync(DB_PATH)) {
       return NextResponse.json({
         success: true,
@@ -156,7 +154,6 @@ export async function GET(request: NextRequest) {
     const result = stmt.all(...params);
     db.close();
     
-    // Parse features JSON for each investment
     const parsedData = result.map((r: any) => ({
       ...r,
       features: JSON.parse(r.features || '[]')
@@ -188,7 +185,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { 
       title, description, category, icon, min_investment, 
-      expected_return, duration, image, features, featured 
+      expected_return, duration, image, features, featured, status
     } = body;
     
     if (!title || !description || !min_investment || !expected_return || !duration) {
@@ -203,7 +200,7 @@ export async function POST(request: NextRequest) {
       INSERT INTO investment_opportunities (
         title, description, category, icon, min_investment, 
         expected_return, duration, image, features, status, featured
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     
     const info = stmt.run(
@@ -216,6 +213,7 @@ export async function POST(request: NextRequest) {
       duration,
       image || '/images/invest/default.jpg',
       JSON.stringify(features || []),
+      status || 'active',
       featured ? 1 : 0
     );
     
@@ -245,8 +243,22 @@ export async function PUT(request: NextRequest) {
   try {
     initializeDatabase();
     
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
+    const body = await request.json();
+    const { 
+      id,
+      title, 
+      description, 
+      category, 
+      icon, 
+      min_investment, 
+      expected_return, 
+      duration, 
+      image, 
+      features, 
+      status, 
+      featured 
+    } = body;
+    
     if (!id) {
       return NextResponse.json(
         { success: false, error: 'Investment ID required' },
@@ -254,18 +266,40 @@ export async function PUT(request: NextRequest) {
       );
     }
     
-    const body = await request.json();
-    const { 
-      title, description, category, icon, min_investment, 
-      expected_return, duration, image, features, status, featured 
-    } = body;
+    if (!title || !description || !min_investment || !expected_return || !duration) {
+      return NextResponse.json(
+        { success: false, error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
     
     const db = new Database(DB_PATH);
+    
+    // Check if investment exists
+    const checkStmt = db.prepare('SELECT id FROM investment_opportunities WHERE id = ?');
+    const existing = checkStmt.get(parseInt(id));
+    
+    if (!existing) {
+      db.close();
+      return NextResponse.json(
+        { success: false, error: 'Investment opportunity not found' },
+        { status: 404 }
+      );
+    }
+    
     const stmt = db.prepare(`
       UPDATE investment_opportunities 
-      SET title = ?, description = ?, category = ?, icon = ?, 
-          min_investment = ?, expected_return = ?, duration = ?, 
-          image = ?, features = ?, status = ?, featured = ?
+      SET title = ?, 
+          description = ?, 
+          category = ?, 
+          icon = ?, 
+          min_investment = ?, 
+          expected_return = ?, 
+          duration = ?, 
+          image = ?, 
+          features = ?, 
+          status = ?, 
+          featured = ?
       WHERE id = ?
     `);
     
