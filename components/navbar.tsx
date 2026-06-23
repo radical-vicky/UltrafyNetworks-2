@@ -156,7 +156,7 @@ export default function Navbar() {
               className="flex items-center gap-2 sm:gap-3 group flex-shrink-0"
             >
               <div className="flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 text-white font-bold shadow-lg transition-transform duration-300 group-hover:scale-105 text-[8px] sm:text-[10px] leading-tight text-center">
-                UFN
+                UltrafyNetworks 
               </div>
 
               <div className="hidden xs:block">
@@ -270,7 +270,7 @@ export default function Navbar() {
               className="flex items-center gap-2 sm:gap-3"
             >
               <div className="flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 text-white font-bold text-[8px] sm:text-[10px] leading-tight text-center">
-                UFN
+                UltrafyNetworks 
               </div>
 
               <div>
