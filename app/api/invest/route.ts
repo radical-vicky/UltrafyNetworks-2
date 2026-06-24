@@ -1,30 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Database from 'better-sqlite3';
-import fs from 'fs';
-import path from 'path';
 
-const DB_PATH = path.join(process.cwd(), 'data', 'invest.db');
-
-// Ensure data directory exists
-function ensureDataDir() {
-  const dir = path.dirname(DB_PATH);
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
-  }
-}
+// Use in-memory database for Vercel compatibility
+let db: Database.Database | null = null;
+let isInitialized = false;
 
 function getDb() {
-  ensureDataDir();
-  const db = new Database(DB_PATH);
-  db.pragma('journal_mode = WAL');
+  if (!db) {
+    // Use memory database - works on Vercel
+    db = new Database(':memory:');
+    db.pragma('journal_mode = WAL');
+  }
   return db;
 }
 
 function initializeDatabase() {
+  if (isInitialized) return;
+  
   try {
     const db = getDb();
     
-    // Create table if not exists
+    // Create table
     db.exec(`
       CREATE TABLE IF NOT EXISTS investment_opportunities (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -60,7 +56,7 @@ function initializeDatabase() {
       const sampleInvestments = [
         [
           'Fibre Network Expansion',
-          'Help us expand our fibre internet network to underserved areas in Thika and surrounding regions. This investment will fund new infrastructure and equipment.',
+          'Help us expand our fibre internet network to underserved areas in Thika and surrounding regions.',
           'Infrastructure',
           'TrendingUp',
           '100,000',
@@ -73,40 +69,40 @@ function initializeDatabase() {
         ],
         [
           'Solar Energy Partnership',
-          'Invest in solar energy solutions for homes and businesses. We\'re partnering with leading solar providers to offer affordable, sustainable energy.',
+          'Invest in solar energy solutions for homes and businesses.',
           'Energy',
           'Sun',
           '50,000',
           '15%',
           '12 months',
           '/images/invest/solar-partnership.jpg',
-          JSON.stringify(['Solar panel installation', 'Battery storage', 'Maintenance services', 'Government incentives']),
+          JSON.stringify(['Solar panel installation', 'Battery storage', 'Maintenance services']),
           'active',
           0
         ],
         [
           'Smart Security Solutions',
-          'Expanding our security services with smart technology. Investment will fund new CCTV systems, AI-powered monitoring, and electric fence installations.',
+          'Expanding our security services with smart technology.',
           'Security',
           'Shield',
           '75,000',
           '18%',
           '15 months',
           '/images/invest/security-solutions.jpg',
-          JSON.stringify(['AI-powered CCTV', 'Smart monitoring', 'Electric fence systems', '24/7 support']),
+          JSON.stringify(['AI-powered CCTV', 'Smart monitoring', 'Electric fence systems']),
           'active',
           1
         ],
         [
           'Community WiFi Hubs',
-          'Establish WiFi hotspots in rural areas, providing affordable internet access to communities. This social enterprise project offers both impact and returns.',
+          'Establish WiFi hotspots in rural areas, providing affordable internet access.',
           'Connectivity',
           'Wifi',
           '30,000',
           '12%',
           '10 months',
           '/images/invest/community-wifi.jpg',
-          JSON.stringify(['WiFi equipment', 'Community centers', 'Digital literacy training', 'Sustainable model']),
+          JSON.stringify(['WiFi equipment', 'Community centers', 'Digital literacy training']),
           'active',
           0
         ],
@@ -119,14 +115,12 @@ function initializeDatabase() {
       });
       
       insertMany(sampleInvestments);
-      console.log('✅ Sample investment data inserted!');
+      console.log('✅ Sample investment data inserted into memory!');
     }
     
-    db.close();
-    return true;
+    isInitialized = true;
   } catch (error) {
     console.error('❌ Error initializing invest database:', error);
-    return false;
   }
 }
 
@@ -146,7 +140,6 @@ export async function GET(request: NextRequest) {
     if (id) {
       const stmt = db.prepare('SELECT * FROM investment_opportunities WHERE id = ?');
       const result = stmt.get(parseInt(id)) as any;
-      db.close();
       
       if (!result) {
         return NextResponse.json(
@@ -185,7 +178,6 @@ export async function GET(request: NextRequest) {
     
     const stmt = db.prepare(query);
     const result = stmt.all(...params) as any[];
-    db.close();
     
     const parsedData = result.map((r: any) => ({
       ...r,
@@ -220,7 +212,7 @@ export async function POST(request: NextRequest) {
     
     if (!title || !description || !min_investment || !expected_return || !duration) {
       return NextResponse.json(
-        { success: false, error: 'Missing required fields: title, description, min_investment, expected_return, duration' },
+        { success: false, error: 'Missing required fields' },
         { status: 400 }
       );
     }
@@ -249,7 +241,6 @@ export async function POST(request: NextRequest) {
     
     const getStmt = db.prepare('SELECT * FROM investment_opportunities WHERE id = ?');
     const newInvestment = getStmt.get(info.lastInsertRowid) as any;
-    db.close();
     
     return NextResponse.json({
       success: true,
@@ -262,7 +253,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('❌ POST error:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to create investment: ' + (error as Error).message },
+      { success: false, error: 'Failed to create investment' },
       { status: 500 }
     );
   }
@@ -299,7 +290,7 @@ export async function PUT(request: NextRequest) {
     
     if (!title || !description || !min_investment || !expected_return || !duration) {
       return NextResponse.json(
-        { success: false, error: 'Missing required fields: title, description, min_investment, expected_return, duration' },
+        { success: false, error: 'Missing required fields' },
         { status: 400 }
       );
     }
@@ -311,7 +302,6 @@ export async function PUT(request: NextRequest) {
     const existing = checkStmt.get(parseInt(id));
     
     if (!existing) {
-      db.close();
       return NextResponse.json(
         { success: false, error: `Investment with ID ${id} not found` },
         { status: 404 }
@@ -349,8 +339,6 @@ export async function PUT(request: NextRequest) {
       parseInt(id)
     );
     
-    db.close();
-    
     if (result.changes === 0) {
       return NextResponse.json(
         { success: false, error: 'Failed to update investment' },
@@ -365,7 +353,7 @@ export async function PUT(request: NextRequest) {
   } catch (error) {
     console.error('❌ PUT error:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to update investment: ' + (error as Error).message },
+      { success: false, error: 'Failed to update investment' },
       { status: 500 }
     );
   }
@@ -394,7 +382,6 @@ export async function DELETE(request: NextRequest) {
     const existing = checkStmt.get(parseInt(id));
     
     if (!existing) {
-      db.close();
       return NextResponse.json(
         { success: false, error: `Investment with ID ${id} not found` },
         { status: 404 }
@@ -403,7 +390,6 @@ export async function DELETE(request: NextRequest) {
     
     const stmt = db.prepare('DELETE FROM investment_opportunities WHERE id = ?');
     const result = stmt.run(parseInt(id));
-    db.close();
     
     if (result.changes === 0) {
       return NextResponse.json(
@@ -419,7 +405,7 @@ export async function DELETE(request: NextRequest) {
   } catch (error) {
     console.error('❌ DELETE error:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to delete investment: ' + (error as Error).message },
+      { success: false, error: 'Failed to delete investment' },
       { status: 500 }
     );
   }
