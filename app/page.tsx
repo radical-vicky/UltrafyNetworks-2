@@ -418,21 +418,21 @@ export default function Home() {
           </p>
           <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
             <a
-              href="tel:0700541561"
+              href="tel:0740121382"
               className="bg-white text-emerald-700 font-bold px-6 sm:px-10 py-3 sm:py-4 rounded-full text-sm sm:text-lg hover:bg-yellow-400 hover:text-blue-950 transition-all duration-300 flex items-center gap-2 sm:gap-3"
             >
               <Phone className="w-4 h-4 sm:w-5 sm:h-5" />
-              Call 0700 541 561
+              Call 0740121382
             </a>
             <a
-              href="https://wa.me/254703199691"
+              href="https://wa.me/254740121382"
               className="border-2 border-white/80 hover:border-white font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-full text-sm sm:text-lg hover:bg-white/10 transition-all duration-300"
             >
               Chat on WhatsApp
             </a>
           </div>
           <p className="text-emerald-200 text-xs sm:text-sm mt-4">
-            WhatsApp: 0703 199 691
+            WhatsApp: 0740121382
           </p>
         </div>
       </section>
