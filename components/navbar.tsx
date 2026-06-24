@@ -210,7 +210,7 @@ export default function Navbar() {
             {/* Desktop CTA */}
             <div className="hidden md:flex items-center gap-2 lg:gap-4">
               <a
-                href="tel:0700541561"
+                href="tel:0740121382"
                 className={`inline-flex items-center gap-1 lg:gap-2 rounded-xl px-2 lg:px-5 py-1.5 lg:py-3 text-xs lg:text-sm font-semibold transition-all duration-300 ${
                   isScrolled
                     ? "text-emerald-600 hover:bg-emerald-50"
@@ -218,7 +218,7 @@ export default function Navbar() {
                 }`}
               >
                 <Phone className="w-3 h-3 lg:w-4 lg:h-4" />
-                <span className="hidden lg:inline">0700 541 561</span>
+                <span className="hidden lg:inline">0740121382</span>
                 <span className="lg:hidden">Call</span>
               </a>
               <a
@@ -343,12 +343,12 @@ export default function Navbar() {
             </a>
 
             <div className="mt-3 flex flex-col items-center justify-center gap-2 text-xs">
-              <a href="tel:0700541561" className="text-emerald-600 font-medium hover:text-emerald-700">
-                Call 0700 541 561
+              <a href="tel:0740121382" className="text-emerald-600 font-medium hover:text-emerald-700">
+                Call 0740121382
               </a>
               <span className="text-gray-300">|</span>
-              <a href="tel:0703199691" className="text-emerald-600 font-medium hover:text-emerald-700">
-                WhatsApp 0703 199 691
+              <a href="tel:0740121382" className="text-emerald-600 font-medium hover:text-emerald-700">
+                WhatsApp 0740121382
               </a>
             </div>
           </div>
